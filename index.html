@@ -3,85 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ordini Trofeo Ronco 2026</title>
+  <title>Trofeo Ronco 2026 - Spettatori</title>
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      max-width: 500px;
-      margin: 20px auto;
-      padding: 0 15px;
-      background-color: #f8f9fa;
-      color: #333;
-    }
-    h1 {
-      text-align: center;
-      color: #1a73e8;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    input, select, button {
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { margin: 0; padding: 0; background-color: #f4f6f8; color: #333; }
+    
+    .header-banner {
+      position: relative;
       width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-    button {
-      background-color: #1a73e8;
-      color: white;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    button:hover {
-      background-color: #1557b0;
-    }
-    #status {
-      margin-top: 15px;
+      height: 220px;
+      background: linear-gradient(180deg, rgba(15,23,42,0.8) 0%, rgba(15,23,42,0.6) 100%), url('IMG_4075.jpeg');
+      background-size: cover;
+      background-position: center 30%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #ffffff;
       text-align: center;
+      padding: 20px;
+    }
+    .header-banner h1 { margin: 0; font-size: 26px; text-transform: uppercase; letter-spacing: 1px; color: #ffffff; }
+    .header-banner p { margin: 5px 0 0; font-size: 14px; color: #e2e8f0; }
+    .header-badge { background: #e67e22; color: #fff; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 20px; margin-bottom: 8px; text-transform: uppercase; }
+
+    .main-card {
+      max-width: 480px;
+      margin: -20px auto 30px;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      position: relative;
+      z-index: 10;
+    }
+
+    .intro-text { font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 20px; text-align: center; }
+    
+    label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-top: 14px; margin-bottom: 6px; }
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      font-size: 15px;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    input:focus, select:focus { outline: none; border-color: #e67e22; background: #fff; }
+
+    .btn-submit {
+      width: 100%;
+      background: #e67e22;
+      color: #ffffff;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
       font-weight: bold;
+      margin-top: 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
     }
-    .toggle-btn {
-      background-color: #5f6368;
-      margin-top: 20px;
+    .btn-submit:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
+
+    .btn-toggle {
+      width: 100%;
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 15px;
+      cursor: pointer;
     }
+
+    #statusMessage {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      text-align: center;
+      display: none;
+    }
+    .success { background: #dcfce7; color: #166534; }
+    .error { background: #fee2e2; color: #991b1b; }
+
     .table-container {
       display: none;
       margin-top: 15px;
-      overflow-x: auto;
-      background: white;
-      padding: 10px;
       border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
     }
-    iframe {
-      width: 100%;
-      height: 300px;
-      border: none;
-    }
+    iframe { width: 100%; height: 280px; border: none; }
   </style>
 </head>
 <body>
 
-  <h1>Ordini Trofeo Ronco 2026</h1>
+  <div class="header-banner">
+    <span class="header-badge">Spettatori</span>
+    <h1>Trofeo Ronco 2026</h1>
+    <p>Domenica 25 Ottobre 2026</p>
+  </div>
 
-  <form id="orderForm">
-    <div class="form-group">
-      <label for="nome">Nome e Cognome:</label>
-      <input type="text" id="nome" name="nome" required placeholder="Inserisci il tuo nome">
-    </div>
+  <div class="main-card">
+    <p class="intro-text">Prenota la tua maglietta ufficiale. I dati verranno registrati direttamente nel sistema dell'organizzazione.</p>
 
-    <div class="form-group">
-      <label for="taglia">Taglia:</label>
-      <select id="taglia" name="taglia" required>
+    <form id="orderForm" onsubmit="submitOrder(event)">
+      <label for="nome">Nome e Cognome</label>
+      <input type="text" id="nome" required placeholder="Es. Marco Rossi">
+
+      <label for="taglia">Taglia Maglietta</label>
+      <select id="taglia" required>
         <option value="">Seleziona una taglia</option>
         <option value="XS">XS</option>
         <option value="S">S</option>
@@ -90,66 +126,69 @@
         <option value="XL">XL</option>
         <option value="XXL">XXL</option>
       </select>
+
+      <label for="quantita">Quantità</label>
+      <input type="number" id="quantita" min="1" value="1" required>
+
+      <button type="submit" id="submitBtn" class="btn-submit">
+        Conferma Prenotazione
+      </button>
+
+      <div id="statusMessage"></div>
+    </form>
+
+    <button class="btn-toggle" onclick="toggleTable()">📊 Mostra / Nascondi Riepilogo Taglie</button>
+    
+    <div class="table-container" id="tableContainer">
+      <iframe src="INSERISCI_QUI_IL_LINK_PUBBLICATO_DEL_FOGLIO"></iframe>
     </div>
-
-    <div class="form-group">
-      <label for="quantita">Quantità:</label>
-      <input type="number" id="quantita" name="quantita" min="1" value="1" required>
-    </div>
-
-    <button type="submit" id="submitBtn">Invia Ordine</button>
-  </form>
-
-  <div id="status"></div>
-
-  <!-- Pulsante per mostrare/nascondere la tabella -->
-  <button class="toggle-btn" onclick="toggleTable()">Mostra / Nascondi Riepilogo Taglie</button>
-
-  <div class="table-container" id="tableContainer">
-    <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vS.../pubhtml?widget=true&amp;headers=false"></iframe>
   </div>
 
   <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbwoK8P1yHhWqVRt1s-QHCFE5gjEgSk1pPr3d_FVRbpl4DhfV71BW8G-SJdLbgZ8_-Pwhw/exec';
-    const form = document.getElementById('orderForm');
-    const statusDiv = document.getElementById('status');
-    const submitBtn = document.getElementById('submitBtn');
 
-    form.addEventListener('submit', e => {
+    function submitOrder(e) {
       e.preventDefault();
-      submitBtn.disabled = true;
-      statusDiv.style.color = '#333';
-      statusDiv.innerText = 'Invio dell\'ordine in corso...';
+
+      const btn = document.getElementById('submitBtn');
+      const status = document.getElementById('statusMessage');
+
+      btn.disabled = true;
+      btn.innerText = "Invio in corso...";
+      status.style.display = "none";
+
+      const payload = {
+        nome: document.getElementById('nome').value,
+        taglia: document.getElementById('taglia').value,
+        quantita: document.getElementById('quantita').value
+      };
 
       fetch(scriptURL, {
         method: 'POST',
-        body: JSON.stringify({
-          nome: form.nome.value,
-          taglia: form.taglia.value,
-          quantita: form.quantita.value
-        })
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       })
-      .then(response => {
-        statusDiv.style.color = 'green';
-        statusDiv.innerText = 'Ordine inviato con successo!';
-        form.reset();
-        submitBtn.disabled = false;
+      .then(() => {
+        status.className = "success";
+        status.innerText = "Prenotazione ricevuta con successo! Grazie.";
+        status.style.display = "block";
+        document.getElementById('orderForm').reset();
       })
       .catch(error => {
-        statusDiv.style.color = 'red';
-        statusDiv.innerText = 'Errore durante l\'invio dell\'ordine.';
-        console.error('Error!', error.message);
-        submitBtn.disabled = false;
+        status.className = "error";
+        status.innerText = "Si è verificato un errore. Riprova più tardi.";
+        status.style.display = "block";
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerText = "Conferma Prenotazione";
       });
-    });
+    }
 
     function toggleTable() {
       const container = document.getElementById('tableContainer');
-      if (container.style.display === 'block') {
-        container.style.display = 'none';
-      } else {
-        container.style.display = 'block';
-      }
+      container.style.display = container.style.display === 'block' ? 'none' : 'block';
     }
   </script>
 
