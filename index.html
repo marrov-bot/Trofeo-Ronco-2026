@@ -3,77 +3,173 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trofeo Ronco 2026 - Ordine Spettatori</title>
+  <title>Trofeo Ronco 2026 - Spettatori</title>
   <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      color: #ffffff;
-      background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('IMG_4075.jpeg');
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { margin: 0; padding: 0; background-color: #f4f6f8; color: #333; }
+    
+    /* Header Banner con Immagine */
+    .header-banner {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      background: linear-gradient(180deg, rgba(15,23,42,0.8) 0%, rgba(15,23,42,0.6) 100%), url('IMG_4075.jpeg');
       background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      min-height: 100vh;
+      background-position: center 30%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #ffffff;
+      text-align: center;
       padding: 20px;
     }
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
-      background: rgba(20, 20, 20, 0.85);
-      backdrop-filter: blur(8px);
-      padding: 25px;
-      border-radius: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    .header-banner h1 { margin: 0; font-size: 26px; text-transform: uppercase; letter-spacing: 1px; color: #ffffff; }
+    .header-banner p { margin: 5px 0 0; font-size: 14px; color: #e2e8f0; }
+    .header-badge { background: #e67e22; color: #fff; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 20px; margin-bottom: 8px; text-transform: uppercase; }
+
+    .main-card {
+      max-width: 480px;
+      margin: -20px auto 30px;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      position: relative;
+      z-index: 10;
     }
-    h1 { text-align: center; margin-top: 0; color: #f39c12; }
-    label { display: block; margin-top: 15px; font-weight: bold; }
-    input, select, button {
+
+    .intro-text { font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 20px; text-align: center; }
+    
+    label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-top: 14px; margin-bottom: 6px; }
+    input, select {
       width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      font-size: 15px;
+      background: #f8fafc;
+      color: #0f172a;
     }
-    input, select { background: #333; color: #fff; }
-    button {
+    input:focus, select:focus { outline: none; border-color: #e67e22; background: #fff; }
+
+    .btn-submit {
+      width: 100%;
       background: #e67e22;
-      color: white;
+      color: #ffffff;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
       font-weight: bold;
-      margin-top: 20px;
+      margin-top: 22px;
       cursor: pointer;
+      box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
     }
-    button:hover { background: #d35400; }
+
+    /* Sezione Privata */
+    .admin-section { margin-top: 35px; border-top: 1px solid #e2e8f0; padding-top: 20px; text-align: center; }
+    .admin-toggle { background: none; border: none; color: #94a3b8; font-size: 12px; cursor: pointer; text-decoration: underline; }
+    .admin-box { display: none; margin-top: 15px; text-align: left; background: #f1f5f9; padding: 15px; border-radius: 10px; }
+    .order-item { background: #fff; padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; border-left: 3px solid #e67e22; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>Trofeo Ronco 2026</h1>
-  <p style="text-align:center;">Modulo d'Ordine Spettatori</p>
-  
-  <form id="orderForm">
-    <label for="nome">Nome e Cognome</label>
-    <input type="text" id="nome" required placeholder="Inserisci il tuo nome">
+  <div class="header-banner">
+    <span class="header-badge">Spettatori</span>
+    <h1>Trofeo Ronco 2026</h1>
+    <p>Domenica 25 Ottobre 2026</p>
+  </div>
 
-    <label for="taglia">Taglia Maglietta</label>
-    <select id="taglia" required>
-      <option value="">Seleziona una taglia</option>
-      <option value="S">S</option>
-      <option value="M">M</option>
-      <option value="L">L</option>
-      <option value="XL">XL</option>
-      <option value="XXL">XXL</option>
-    </select>
+  <div class="main-card">
+    <p class="intro-text">Prenota qui la tua maglietta ufficiale dello spettatore. Compila i campi sottostanti per inviare l'ordine.</p>
 
-    <label for="quantita">Quantità</label>
-    <input type="number" id="quantita" min="1" value="1" required>
+    <form id="orderForm" onsubmit="submitOrder(event)">
+      <label for="nome">Nome e Cognome</label>
+      <input type="text" id="nome" required placeholder="Es. Marco Rossi">
 
-    <button type="submit">Conferma Ordine</button>
-  </form>
-</div>
+      <label for="taglia">Taglia Maglietta</label>
+      <select id="taglia" required>
+        <option value="">Seleziona una taglia</option>
+        <option value="S">S</option>
+        <option value="M">M</option>
+        <option value="L">L</option>
+        <option value="XL">XL</option>
+        <option value="XXL">XXL</option>
+      </select>
+
+      <label for="quantita">Quantità</label>
+      <input type="number" id="quantita" min="1" value="1" required>
+
+      <button type="submit" class="btn-submit">Conferma Prenotazione</button>
+    </form>
+
+    <div class="admin-section">
+      <button class="admin-toggle" onclick="toggleAdmin()">Area Riservata Organizzazione</button>
+      <div id="adminBox" class="admin-box">
+        <label for="pin">Inserisci PIN per accedere:</label>
+        <input type="password" id="pin" placeholder="PIN" style="margin-bottom: 10px;">
+        <button type="button" onclick="checkPin()" style="background:#334155; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; width:100%;">Accedi</button>
+        
+        <div id="ordersList" style="margin-top: 15px; display:none;">
+          <h4 style="margin: 0 0 10px; color:#0f172a;">Riepilogo Ordini Salvati:</h4>
+          <div id="ordersContainer">Nessun ordine registrato sul dispositivo.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function submitOrder(e) {
+      e.preventDefault();
+      const nome = document.getElementById('nome').value;
+      const taglia = document.getElementById('taglia').value;
+      const quantita = document.getElementById('quantita').value;
+
+      const newOrder = { nome, taglia, quantita, data: new Date().toLocaleDateString('it-IT') };
+      
+      let orders = JSON.parse(localStorage.getItem('trofeo_orders') || '[]');
+      orders.push(newOrder);
+      localStorage.setItem('trofeo_orders', JSON.stringify(orders));
+
+      alert('Ordine inviato con successo!');
+      document.getElementById('orderForm').reset();
+    }
+
+    function toggleAdmin() {
+      const box = document.getElementById('adminBox');
+      box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function checkPin() {
+      const pin = document.getElementById('pin').value;
+      if (pin === '2026') { // PIN predefinito
+        document.getElementById('ordersList').style.display = 'block';
+        loadOrders();
+      } else {
+        alert('PIN errato!');
+      }
+    }
+
+    function loadOrders() {
+      const container = document.getElementById('ordersContainer');
+      const orders = JSON.parse(localStorage.getItem('trofeo_orders') || '[]');
+      
+      if (orders.length === 0) {
+        container.innerHTML = '<em>Nessun ordine presente.</em>';
+        return;
+      }
+
+      container.innerHTML = orders.map((o, i) => `
+        <div class="order-item">
+          <strong>#${i+1} ${o.nome}</strong><br>
+          Taglia: ${o.taglia} | Q.tà: ${o.quantita}<br>
+          <small style="color:#64748b;">${o.data}</small>
+        </div>
+      `).join('');
+    }
+  </script>
 
 </body>
 </html>
