@@ -8,7 +8,7 @@
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { margin: 0; padding: 0; background-color: #f0f4f8; color: #2d3748; }
     
-    /* Contenitore Banner con Slideshow */
+    /* Contenitore Banner con Slideshow Minimal */
     .header-banner {
       position: relative;
       width: 100%;
@@ -24,12 +24,12 @@
       padding: 24px 15px 35px;
     }
 
-    /* Overlay scuro sopra le foto per garantire leggibilità ai testi */
+    /* Overlay scuro rinforzato per massima pulizia e contrasto */
     .header-banner::before {
       content: "";
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.5) 0%, rgba(15, 23, 42, 0.15) 60%, rgba(15, 23, 42, 0.55) 100%);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.65) 0%, rgba(15, 23, 42, 0.35) 50%, rgba(15, 23, 42, 0.7) 100%);
       z-index: 2;
       pointer-events: none;
     }
@@ -47,7 +47,7 @@
       background-position: center center;
       background-repeat: no-repeat;
       opacity: 0;
-      transition: opacity 1.2s ease-in-out;
+      transition: opacity 1.5s ease-in-out;
     }
     .slide.active {
       opacity: 1;
@@ -90,26 +90,6 @@
       letter-spacing: 2px;
       text-shadow: 0 1px 3px rgba(0,0,0,0.8);
       margin-bottom: 5px;
-    }
-
-    /* Indicatori Pallini (Dots) */
-    .carousel-dots {
-      position: absolute;
-      bottom: 10px;
-      z-index: 4;
-      display: flex;
-      gap: 6px;
-    }
-    .dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.4);
-      transition: background 0.3s ease, transform 0.3s ease;
-    }
-    .dot.active {
-      background: #ffffff;
-      transform: scale(1.2);
     }
 
     .main-card {
@@ -315,19 +295,6 @@
       </div>
       <div class="header-subtitle">7ª Edizione</div>
     </div>
-
-    <!-- Pallini Indicatori (9 Foto) -->
-    <div class="carousel-dots">
-      <div class="dot active"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-    </div>
   </div>
 
   <div class="main-card">
@@ -401,20 +368,15 @@
   </div>
 
   <script>
-    // --- Gestione Rotazione Foto (Slideshow) ---
+    // --- Gestione Rotazione Foto (Transizione Dolce ogni 6 secondi) ---
     const slides = document.querySelectorAll('.slide');
-    const dots = document.querySelectorAll('.dot');
     let currentSlide = 0;
-    const slideInterval = 4000; // Cambia immagine ogni 4 secondi (4000 ms)
+    const slideInterval = 6000; // 6 secondi tra un'immagine e l'altra
 
     function nextSlide() {
       slides[currentSlide].classList.remove('active');
-      dots[currentSlide].classList.remove('active');
-      
       currentSlide = (currentSlide + 1) % slides.length;
-      
       slides[currentSlide].classList.add('active');
-      dots[currentSlide].classList.add('active');
     }
 
     if (slides.length > 1) {
