@@ -12,9 +12,11 @@
       position: relative;
       width: 100%;
       height: 300px;
+      min-height: 280px;
       background: linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.1) 60%, rgba(15, 23, 42, 0.5) 100%), url('IMG_4075.jpeg');
       background-size: cover;
-      background-position: center 10%;
+      background-position: center center;
+      background-repeat: no-repeat;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -60,6 +62,24 @@
       position: relative;
       z-index: 10;
       border: 1px solid #e2e8f0;
+    }
+
+    /* Regolazioni esclusive per schermi grandi (PC) */
+    @media (min-width: 768px) {
+      .header-banner {
+        height: 38vh;
+        max-height: 420px;
+        padding: 30px 15px 45px;
+      }
+      .header-banner h1 {
+        font-size: 34px;
+      }
+      .header-banner p.date {
+        font-size: 16px;
+      }
+      .main-card {
+        margin-top: -35px;
+      }
     }
 
     .intro-text { 
@@ -228,6 +248,7 @@
       <div><span class="badge-price">Quota maglietta: 20€ • Ritiro all'evento</span></div>
     </div>
 
+    <!-- Box di esito positivo -->
     <div id="successBox" class="success-box">
       <div class="icon">🎉</div>
       <h3>Preordine registrato!</h3>
@@ -280,6 +301,7 @@
       <div id="errorBox" class="error-box">Si è verificato un errore. Riprova più tardi.</div>
     </form>
 
+    <!-- Accesso di gestione -->
     <div class="footer-access">
       © Trofeo Ronco 2026 • <span onclick="toggleTable()">Gestione</span>
     </div>
