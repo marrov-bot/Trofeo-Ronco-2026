@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trofeo Ronco 2026 - Spettatori</title>
+  <title>Trofeo Ronco 2026 - Preordine Maglietta</title>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { margin: 0; padding: 0; background-color: #f0f4f8; color: #2d3748; }
@@ -224,18 +224,19 @@
   <div class="main-card">
     
     <div class="intro-text" id="introText">
-      Prenota la tua maglietta ufficiale del Trofeo Ronco.
+      Preordina la maglietta ufficiale del Trofeo Ronco.
+      <div style="margin-top: 4px; font-size: 12.5px; color: #475569;">Prodotta su misura in base alle richieste ricevute.</div>
       <div><span class="badge-price">Quota maglietta: 20€ • Ritiro all'evento</span></div>
     </div>
 
     <!-- Box di esito positivo -->
     <div id="successBox" class="success-box">
       <div class="icon">🎉</div>
-      <h3>Prenotazione ricevuta!</h3>
-      <p>Ti abbiamo inviato un'email di conferma con il riepilogo.</p>
+      <h3>Preordine registrato!</h3>
+      <p>Ti abbiamo inviato un'email di conferma con il riepilogo del tuo ordine.</p>
       
       <div class="summary-card">
-        <p><strong>Riepilogo Ordine:</strong></p>
+        <p><strong>Riepilogo Preordine:</strong></p>
         <p>• Nome: <span id="resNome"></span></p>
         <p>• Email: <span id="resEmail"></span></p>
         <p>• Taglia: <span id="resTaglia"></span></p>
@@ -243,14 +244,14 @@
       </div>
 
       <ul class="info-list">
-        <li><strong>Ritiro e quota:</strong> La maglietta si ritira al banco dell'evento (quota: <strong>20€</strong>).</li>
-        <li><strong>Comunicazioni:</strong> Utilizzeremo la tua email per eventuali informazioni organizzative o avvisi sull'evento.</li>
-        <li><strong>Solidarietà:</strong> Troverai anche il banco per le offerte libere a sostegno delle nostre iniziative sociali.</li>
+        <li><strong>Produzione e Ritiro:</strong> La maglietta verrà realizzata su misura e la potrai ritirare al banco dell'evento (quota: <strong>20€</strong>).</li>
+        <li><strong>Comunicazioni:</strong> Utilizzeremo la tua email per avvisarti tempestivamente di eventuali novità o informazioni sull'evento.</li>
+        <li><strong>Solidarietà:</strong> Troverai anche il banco per le offerte libere a sostegno dei nostri progetti sociali.</li>
       </ul>
 
       <p style="font-weight: bold; color: #065f46; margin: 12px 0 16px;">Ci vediamo sul campo! 👕👍</p>
 
-      <button type="button" class="btn-reset" onclick="resetForm()">Invia un'altra prenotazione</button>
+      <button type="button" class="btn-reset" onclick="resetForm()">Effettua un altro preordine</button>
     </div>
 
     <form id="orderForm" onsubmit="submitOrder(event)">
@@ -259,11 +260,11 @@
 
       <label for="email">Email</label>
       <input type="email" id="email" required placeholder="Es. marco@esempio.it">
-      <div class="field-hint">Utilizzata per la conferma e per avvisarti tempestivamente in caso di variazioni (es. meteo o orari).</div>
+      <div class="field-hint">Per la conferma e per eventuali comunicazioni sull'evento (es. variazioni o info meteo).</div>
 
       <label for="taglia">Taglia Maglietta</label>
       <select id="taglia" required>
-        <option value="">Seleziona una taglia</option>
+        <option value="">Seleziona la tua taglia</option>
         <option value="S">S</option>
         <option value="M">M</option>
         <option value="L">L</option>
@@ -275,7 +276,7 @@
       <input type="number" id="quantita" min="1" value="1" required>
 
       <button type="submit" id="submitBtn" class="btn-submit">
-        Conferma Prenotazione
+        Conferma Preordine
       </button>
 
       <div id="errorBox" class="error-box">Si è verificato un errore. Riprova più tardi.</div>
@@ -338,7 +339,7 @@
       })
       .finally(() => {
         btn.disabled = false;
-        btn.innerText = "Conferma Prenotazione";
+        btn.innerText = "Conferma Preordine";
       });
     }
 
