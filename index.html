@@ -62,28 +62,24 @@
       border: 1px solid #e2e8f0;
     }
 
-    /* Box motivazionale in Home Page */
-    .intro-box {
-      background-color: #f8fafc;
-      border-left: 4px solid #0284c7;
-      padding: 14px 16px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      font-size: 13.5px;
-      color: #334155;
-      line-height: 1.5;
+    /* Testo introduttivo essenziale e pulito */
+    .intro-text { 
+      font-size: 14px; 
+      color: #64748b; 
+      line-height: 1.5; 
+      margin-bottom: 18px; 
+      text-align: center; 
     }
-    .intro-box h3 {
-      margin: 0 0 8px;
-      color: #0284c7;
-      font-size: 16px;
-      font-weight: 700;
-    }
-    .intro-box p {
-      margin: 0 0 8px;
-    }
-    .intro-box p:last-child {
-      margin-bottom: 0;
+    .badge-price {
+      display: inline-block;
+      background-color: #f0f9ff;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 6px;
     }
     
     label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-top: 14px; margin-bottom: 6px; }
@@ -137,7 +133,7 @@
       border-radius: 10px;
       padding: 14px;
       text-align: left;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
     .summary-card p {
       margin: 4px 0;
@@ -150,12 +146,12 @@
       text-align: left;
       font-size: 13px;
       color: #047857;
-      margin: 14px 0;
+      margin: 16px 0;
       padding-left: 18px;
       line-height: 1.5;
     }
     .info-list li {
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     .btn-reset {
@@ -217,24 +213,21 @@
       <h1>Trofeo Ronco 2026</h1>
       <p class="date">Domenica 25 Ottobre 2026</p>
     </div>
-    <div class="header-subtitle">Spettatori</div>
+    <div class="header-subtitle">7ª Edizione</div>
   </div>
 
   <div class="main-card">
     
-    <!-- Box motivazionale in Home Page -->
-    <div id="introBox" class="intro-box">
-      <h3>👕 7° Trofeo Ronco – Prendi la tua maglietta!</h3>
-      <p>Giunti alla <strong>7ª edizione</strong>, la maglietta del Trofeo Ronco è ormai un simbolo del nostro torneo!</p>
-      <p>Anche quest'anno le offerte e la partecipazione andranno a <strong>sostenere le nostre iniziative di solidarietà</strong> — dai progetti sul territorio fino alle realtà scolastiche e sanitarie che seguiamo da vicino.</p>
-      <p>📌 <strong>Ritiro e quota (20€ per la maglietta)</strong> avverranno direttamente all'evento, dove troverai anche il banco dedicato per le offerte libere se desideri sostenere ulteriormente i nostri progetti.</p>
+    <div class="intro-text" id="introText">
+      Prenota la tua maglietta ufficiale del Trofeo Ronco.
+      <div><span class="badge-price">Quota maglietta: 20€ • Ritiro all'evento</span></div>
     </div>
 
     <!-- Box di esito positivo con riepilogo -->
     <div id="successBox" class="success-box">
       <div class="icon">🎉</div>
       <h3>Prenotazione ricevuta!</h3>
-      <p>Grazie per far parte anche quest'anno del <strong>7° Trofeo Ronco</strong>!</p>
+      <p>Grazie per sostenere le nostre iniziative di solidarietà anche quest'anno.</p>
       
       <div class="summary-card">
         <p><strong>Riepilogo Ordine:</strong></p>
@@ -244,8 +237,8 @@
       </div>
 
       <ul class="info-list">
-        <li><strong>Ritiro e quota:</strong> Troverai la tua maglietta direttamente al banco dell'evento (quota maglietta: <strong>20€</strong>).</li>
-        <li><strong>Offerte e solidarietà:</strong> Per chi desidera sostenere ulteriormente le nostre iniziative e i progetti sociali di quest'anno, sarà presente il banco dedicato per le offerte libere.</li>
+        <li><strong>Ritiro e quota:</strong> La maglietta si ritira al banco dell'evento (quota: <strong>20€</strong>).</li>
+        <li><strong>Offerte e solidarietà:</strong> Troverai il banco dedicato per chi desidera fare un'offerta libera a sostegno dei nostri progetti sociali.</li>
       </ul>
 
       <p style="font-weight: bold; color: #065f46; margin: 12px 0 16px;">Ci vediamo sul campo! 👕👍</p>
@@ -323,9 +316,9 @@
         document.getElementById('resTaglia').innerText = tagliaVal;
         document.getElementById('resQuantita').innerText = quantitaVal;
 
-        // Mostriamo il box di successo e nascondiamo form e intro
+        // Mostriamo il box di successo
         document.getElementById('orderForm').style.display = 'none';
-        document.getElementById('introBox').style.display = 'none';
+        document.getElementById('introText').style.display = 'none';
         document.getElementById('successBox').style.display = 'block';
       })
       .catch(error => {
@@ -340,7 +333,7 @@
     function resetForm() {
       document.getElementById('orderForm').reset();
       document.getElementById('orderForm').style.display = 'block';
-      document.getElementById('introBox').style.display = 'block';
+      document.getElementById('introText').style.display = 'block';
       document.getElementById('successBox').style.display = 'none';
     }
 
