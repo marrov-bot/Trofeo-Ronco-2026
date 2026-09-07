@@ -23,9 +23,7 @@
       text-align: center;
       padding: 24px 15px 35px;
     }
-    .header-top {
-      margin-top: 5px;
-    }
+    .header-top { margin-top: 5px; }
     .header-banner h1 { 
       margin: 0; 
       font-size: 26px; 
@@ -96,6 +94,50 @@
     .btn-submit:hover { background: #0369a1; }
     .btn-submit:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
 
+    /* Box di successo in evidenza */
+    .success-box {
+      display: none;
+      background: #ecfdf5;
+      border: 1.5px solid #a7f3d0;
+      border-radius: 14px;
+      padding: 24px 16px;
+      text-align: center;
+      margin-bottom: 15px;
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .success-box .icon { font-size: 42px; margin-bottom: 10px; }
+    .success-box h3 { margin: 0 0 8px; color: #065f46; font-size: 18px; font-weight: 700; }
+    .success-box p { margin: 0; color: #047857; font-size: 14px; line-height: 1.4; }
+    
+    .btn-reset {
+      background: transparent;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 16px;
+      cursor: pointer;
+    }
+
+    .error-box {
+      display: none;
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
     .btn-toggle {
       width: 100%;
       background: #e0f2fe;
@@ -110,17 +152,6 @@
       transition: background 0.2s ease;
     }
     .btn-toggle:hover { background: #bae6fd; }
-
-    #statusMessage {
-      margin-top: 16px;
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 14px;
-      text-align: center;
-      display: none;
-    }
-    .success { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-    .error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
     .table-container {
       display: none;
@@ -144,7 +175,15 @@
   </div>
 
   <div class="main-card">
-    <p class="intro-text">Prenota la tua maglietta ufficiale. I dati verranno registrati direttamente nel sistema dell'organizzazione.</p>
+    <p class="intro-text" id="introText">Prenota la tua maglietta ufficiale. I dati verranno registrati direttamente nel sistema dell'organizzazione.</p>
+
+    <!-- Box di esito positivo -->
+    <div id="successBox" class="success-box">
+      <div class="icon">✅</div>
+      <h3>Prenotazione ricevuta!</h3>
+      <p>La tua richiesta è stata registrata con successo nel sistema.<br>Grazie per la partecipazione!</p>
+      <button type="button" class="btn-reset" onclick="resetForm()">Invia un'altra prenotazione</button>
+    </div>
 
     <form id="orderForm" onsubmit="submitOrder(event)">
       <label for="nome">Nome e Cognome</label>
@@ -167,7 +206,7 @@
         Conferma Prenotazione
       </button>
 
-      <div id="statusMessage"></div>
+      <div id="errorBox" class="error-box">Si è verificato un errore. Riprova più tardi.</div>
     </form>
 
     <button class="btn-toggle" onclick="toggleTable()">🔒 Area Riservata: Riepilogo Taglie</button>
@@ -185,11 +224,11 @@
       e.preventDefault();
 
       const btn = document.getElementById('submitBtn');
-      const status = document.getElementById('statusMessage');
+      const errorBox = document.getElementById('errorBox');
 
       btn.disabled = true;
       btn.innerText = "Invio in corso...";
-      status.style.display = "none";
+      errorBox.style.display = "none";
 
       const payload = {
         nome: document.getElementById('nome').value,
@@ -204,20 +243,25 @@
         body: JSON.stringify(payload)
       })
       .then(() => {
-        status.className = "success";
-        status.innerText = "Prenotazione ricevuta con successo! Grazie.";
-        status.style.display = "block";
-        document.getElementById('orderForm').reset();
+        // Nascondiamo il modulo e mostriamo il box verde di successo
+        document.getElementById('orderForm').style.display = 'none';
+        document.getElementById('introText').style.display = 'none';
+        document.getElementById('successBox').style.display = 'block';
       })
       .catch(error => {
-        status.className = "error";
-        status.innerText = "Si è verificato un errore. Riprova più tardi.";
-        status.style.display = "block";
+        errorBox.style.display = "block";
       })
       .finally(() => {
         btn.disabled = false;
         btn.innerText = "Conferma Prenotazione";
       });
+    }
+
+    function resetForm() {
+      document.getElementById('orderForm').reset();
+      document.getElementById('orderForm').style.display = 'block';
+      document.getElementById('introText').style.display = 'block';
+      document.getElementById('successBox').style.display = 'none';
     }
 
     function toggleTable() {
