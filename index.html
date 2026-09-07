@@ -62,7 +62,6 @@
       border: 1px solid #e2e8f0;
     }
 
-    /* Testo introduttivo essenziale e pulito */
     .intro-text { 
       font-size: 14px; 
       color: #64748b; 
@@ -95,6 +94,13 @@
     }
     input:focus, select:focus { outline: none; border-color: #38bdf8; background: #ffffff; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2); }
 
+    .field-hint {
+      font-size: 11.5px;
+      color: #64748b;
+      margin-top: 4px;
+      line-height: 1.3;
+    }
+
     .btn-submit {
       width: 100%;
       background: #0284c7;
@@ -112,7 +118,7 @@
     .btn-submit:hover { background: #0369a1; }
     .btn-submit:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
 
-    /* Scheda di conferma e riepilogo ordine */
+    /* Scheda di conferma */
     .success-box {
       display: none;
       background: #ecfdf5;
@@ -177,7 +183,6 @@
       margin-top: 16px;
     }
 
-    /* Accesso discreto in grigino */
     .footer-access {
       margin-top: 24px;
       text-align: center;
@@ -223,22 +228,24 @@
       <div><span class="badge-price">Quota maglietta: 20€ • Ritiro all'evento</span></div>
     </div>
 
-    <!-- Box di esito positivo con riepilogo -->
+    <!-- Box di esito positivo -->
     <div id="successBox" class="success-box">
       <div class="icon">🎉</div>
       <h3>Prenotazione ricevuta!</h3>
-      <p>Grazie per sostenere le nostre iniziative di solidarietà anche quest'anno.</p>
+      <p>Ti abbiamo inviato un'email di conferma con il riepilogo.</p>
       
       <div class="summary-card">
         <p><strong>Riepilogo Ordine:</strong></p>
         <p>• Nome: <span id="resNome"></span></p>
+        <p>• Email: <span id="resEmail"></span></p>
         <p>• Taglia: <span id="resTaglia"></span></p>
         <p>• Quantità: <span id="resQuantita"></span></p>
       </div>
 
       <ul class="info-list">
         <li><strong>Ritiro e quota:</strong> La maglietta si ritira al banco dell'evento (quota: <strong>20€</strong>).</li>
-        <li><strong>Offerte e solidarietà:</strong> Troverai il banco dedicato per chi desidera fare un'offerta libera a sostegno dei nostri progetti sociali.</li>
+        <li><strong>Comunicazioni:</strong> Utilizzeremo la tua email per eventuali informazioni organizzative o avvisi sull'evento.</li>
+        <li><strong>Solidarietà:</strong> Troverai anche il banco per le offerte libere a sostegno delle nostre iniziative sociali.</li>
       </ul>
 
       <p style="font-weight: bold; color: #065f46; margin: 12px 0 16px;">Ci vediamo sul campo! 👕👍</p>
@@ -249,6 +256,10 @@
     <form id="orderForm" onsubmit="submitOrder(event)">
       <label for="nome">Nome e Cognome</label>
       <input type="text" id="nome" required placeholder="Es. Marco Rossi">
+
+      <label for="email">Email</label>
+      <input type="email" id="email" required placeholder="Es. marco@esempio.it">
+      <div class="field-hint">Utilizzata per la conferma e per avvisarti tempestivamente in caso di variazioni (es. meteo o orari).</div>
 
       <label for="taglia">Taglia Maglietta</label>
       <select id="taglia" required>
@@ -291,6 +302,7 @@
       const errorBox = document.getElementById('errorBox');
 
       const nomeVal = document.getElementById('nome').value;
+      const emailVal = document.getElementById('email').value;
       const tagliaVal = document.getElementById('taglia').value;
       const quantitaVal = document.getElementById('quantita').value;
 
@@ -300,6 +312,7 @@
 
       const payload = {
         nome: nomeVal,
+        email: emailVal,
         taglia: tagliaVal,
         quantita: quantitaVal
       };
@@ -311,12 +324,11 @@
         body: JSON.stringify(payload)
       })
       .then(() => {
-        // Popoliamo il riepilogo
         document.getElementById('resNome').innerText = nomeVal;
+        document.getElementById('resEmail').innerText = emailVal;
         document.getElementById('resTaglia').innerText = tagliaVal;
         document.getElementById('resQuantita').innerText = quantitaVal;
 
-        // Mostriamo il box di successo
         document.getElementById('orderForm').style.display = 'none';
         document.getElementById('introText').style.display = 'none';
         document.getElementById('successBox').style.display = 'block';
