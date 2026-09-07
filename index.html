@@ -94,30 +94,44 @@
     .btn-submit:hover { background: #0369a1; }
     .btn-submit:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
 
-    /* Box di successo in evidenza */
+    /* Scheda di conferma e riepilogo ordine */
     .success-box {
       display: none;
       background: #ecfdf5;
       border: 1.5px solid #a7f3d0;
       border-radius: 14px;
-      padding: 24px 16px;
+      padding: 24px 18px;
       text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .success-box .icon { font-size: 42px; margin-bottom: 10px; }
-    .success-box h3 { margin: 0 0 8px; color: #065f46; font-size: 18px; font-weight: 700; }
-    .success-box p { margin: 0; color: #047857; font-size: 14px; line-height: 1.4; }
+    .success-box .icon { font-size: 42px; margin-bottom: 8px; }
+    .success-box h3 { margin: 0 0 6px; color: #065f46; font-size: 18px; font-weight: 700; }
+    .success-box p { margin: 0 0 16px; color: #047857; font-size: 14px; }
     
+    .summary-card {
+      background: #ffffff;
+      border: 1px dashed #a7f3d0;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: left;
+      margin-bottom: 18px;
+    }
+    .summary-card p {
+      margin: 4px 0;
+      font-size: 14px;
+      color: #1e293b;
+    }
+    .summary-card strong { color: #047857; }
+
     .btn-reset {
       background: transparent;
       color: #047857;
       border: 1px solid #a7f3d0;
-      padding: 8px 16px;
+      padding: 9px 18px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 600;
-      margin-top: 16px;
       cursor: pointer;
     }
 
@@ -133,25 +147,18 @@
       margin-top: 16px;
     }
 
-    @keyframes popIn {
-      from { opacity: 0; transform: scale(0.92); }
-      to { opacity: 1; transform: scale(1); }
+    /* Accesso discreto in grigino */
+    .footer-access {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: #94a3b8;
     }
-
-    .btn-toggle {
-      width: 100%;
-      background: #e0f2fe;
-      color: #0369a1;
-      border: 1px solid #bae6fd;
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      margin-top: 18px;
+    .footer-access span {
       cursor: pointer;
-      transition: background 0.2s ease;
+      text-decoration: underline;
     }
-    .btn-toggle:hover { background: #bae6fd; }
+    .footer-access span:hover { color: #64748b; }
 
     .table-container {
       display: none;
@@ -162,6 +169,11 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     iframe { width: 100%; height: 280px; border: none; }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to { opacity: 1; transform: scale(1); }
+    }
   </style>
 </head>
 <body>
@@ -177,11 +189,19 @@
   <div class="main-card">
     <p class="intro-text" id="introText">Prenota la tua maglietta ufficiale. I dati verranno registrati direttamente nel sistema dell'organizzazione.</p>
 
-    <!-- Box di esito positivo -->
+    <!-- Box di esito positivo con riepilogo -->
     <div id="successBox" class="success-box">
       <div class="icon">✅</div>
       <h3>Prenotazione ricevuta!</h3>
-      <p>La tua richiesta è stata registrata con successo nel sistema.<br>Grazie per la partecipazione!</p>
+      <p>La tua richiesta è stata registrata con successo.</p>
+      
+      <div class="summary-card">
+        <p><strong>Riepilogo Ordine:</strong></p>
+        <p>• Nome: <span id="resNome"></span></p>
+        <p>• Taglia: <span id="resTaglia"></span></p>
+        <p>• Quantità: <span id="resQuantita"></span></p>
+      </div>
+
       <button type="button" class="btn-reset" onclick="resetForm()">Invia un'altra prenotazione</button>
     </div>
 
@@ -209,8 +229,11 @@
       <div id="errorBox" class="error-box">Si è verificato un errore. Riprova più tardi.</div>
     </form>
 
-    <button class="btn-toggle" onclick="toggleTable()">🔒 Area Riservata: Riepilogo Taglie</button>
-    
+    <!-- Accesso discreto al foglio Google -->
+    <div class="footer-access">
+      © Trofeo Ronco 2026 • <span onclick="toggleTable()">Gestione</span>
+    </div>
+
     <div class="table-container" id="tableContainer">
       <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTnq96KHHaVK0QfYrUFwBatb_IEJotF1GtRq0Ff7z6AFiU5wHpTEurmrnlGednbr66fHUXmh2ueELJw/pubhtml?gid=1109538376&amp;single=true"></iframe>
     </div>
@@ -226,14 +249,18 @@
       const btn = document.getElementById('submitBtn');
       const errorBox = document.getElementById('errorBox');
 
+      const nomeVal = document.getElementById('nome').value;
+      const tagliaVal = document.getElementById('taglia').value;
+      const quantitaVal = document.getElementById('quantita').value;
+
       btn.disabled = true;
       btn.innerText = "Invio in corso...";
       errorBox.style.display = "none";
 
       const payload = {
-        nome: document.getElementById('nome').value,
-        taglia: document.getElementById('taglia').value,
-        quantita: document.getElementById('quantita').value
+        nome: nomeVal,
+        taglia: tagliaVal,
+        quantita: quantitaVal
       };
 
       fetch(scriptURL, {
@@ -243,7 +270,12 @@
         body: JSON.stringify(payload)
       })
       .then(() => {
-        // Nascondiamo il modulo e mostriamo il box verde di successo
+        // Popoliamo il riepilogo
+        document.getElementById('resNome').innerText = nomeVal;
+        document.getElementById('resTaglia').innerText = tagliaVal;
+        document.getElementById('resQuantita').innerText = quantitaVal;
+
+        // Mostriamo il box di successo
         document.getElementById('orderForm').style.display = 'none';
         document.getElementById('introText').style.display = 'none';
         document.getElementById('successBox').style.display = 'block';
