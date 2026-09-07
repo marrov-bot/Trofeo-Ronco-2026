@@ -8,15 +8,13 @@
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { margin: 0; padding: 0; background-color: #f0f4f8; color: #2d3748; }
     
+    /* Contenitore Banner con Slideshow */
     .header-banner {
       position: relative;
       width: 100%;
       height: 300px;
       min-height: 280px;
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.1) 60%, rgba(15, 23, 42, 0.5) 100%), url('IMG_4075.jpeg');
-      background-size: cover;
-      background-position: center center;
-      background-repeat: no-repeat;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -25,6 +23,48 @@
       text-align: center;
       padding: 24px 15px 35px;
     }
+
+    /* Overlay scuro sopra le foto per garantire leggibilità ai testi */
+    .header-banner::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.5) 0%, rgba(15, 23, 42, 0.15) 60%, rgba(15, 23, 42, 0.55) 100%);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* Singola Slide */
+    .slides-container {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 1;
+    }
+    .slide {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      opacity: 0;
+      transition: opacity 1.2s ease-in-out;
+    }
+    .slide.active {
+      opacity: 1;
+    }
+
+    /* Testi sopra le slide */
+    .header-content {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+    }
+
     .header-top { margin-top: 5px; }
     .header-banner h1 { 
       margin: 0; 
@@ -52,6 +92,26 @@
       margin-bottom: 5px;
     }
 
+    /* Indicatori Pallini (Dots) */
+    .carousel-dots {
+      position: absolute;
+      bottom: 10px;
+      z-index: 4;
+      display: flex;
+      gap: 6px;
+    }
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    .dot.active {
+      background: #ffffff;
+      transform: scale(1.2);
+    }
+
     .main-card {
       max-width: 480px;
       margin: -25px auto 30px;
@@ -64,7 +124,7 @@
       border: 1px solid #e2e8f0;
     }
 
-    /* Regolazioni esclusive per schermi grandi (PC) */
+    /* Adattamento per PC */
     @media (min-width: 768px) {
       .header-banner {
         height: 38vh;
@@ -234,11 +294,32 @@
 <body>
 
   <div class="header-banner">
-    <div class="header-top">
-      <h1>Trofeo Ronco 2026</h1>
-      <p class="date">Domenica 25 Ottobre 2026</p>
+    <!-- Immagini dello Slideshow -->
+    <div class="slides-container">
+      <div class="slide active" style="background-image: url('IMG_4075.jpeg');"></div>
+      <div class="slide" style="background-image: url('IMG_4067.jpeg');"></div>
+      <div class="slide" style="background-image: url('IMG_4128.jpeg');"></div>
+      <div class="slide" style="background-image: url('IMG_4273.jpeg');"></div>
+      <div class="slide" style="background-image: url('IMG_4387.jpeg');"></div>
     </div>
-    <div class="header-subtitle">7ª Edizione</div>
+
+    <!-- Contenuto Testuale sopra le immagini -->
+    <div class="header-content">
+      <div class="header-top">
+        <h1>Trofeo Ronco 2026</h1>
+        <p class="date">Domenica 25 Ottobre 2026</p>
+      </div>
+      <div class="header-subtitle">7ª Edizione</div>
+    </div>
+
+    <!-- Pallini Indicatori -->
+    <div class="carousel-dots">
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
   </div>
 
   <div class="main-card">
@@ -312,6 +393,27 @@
   </div>
 
   <script>
+    // --- Gestione Rotazione Foto (Slideshow) ---
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
+    let currentSlide = 0;
+    const slideInterval = 4000; // Cambia immagine ogni 4 secondi (4000 ms)
+
+    function nextSlide() {
+      slides[currentSlide].classList.remove('active');
+      dots[currentSlide].classList.remove('active');
+      
+      currentSlide = (currentSlide + 1) % slides.length;
+      
+      slides[currentSlide].classList.add('active');
+      dots[currentSlide].classList.add('active');
+    }
+
+    if (slides.length > 1) {
+      setInterval(nextSlide, slideInterval);
+    }
+
+    // --- Gestione Invio Ordine ---
     const scriptURL = 'https://script.google.com/macros/s/AKfycby2hyW6nqdssrr3LibPG2J8f5c34G_66fQrBGzK6W2bnF0FUndPmv9IpoblB17Mh4L5sw/exec';
     let isAuthenticated = false;
 
