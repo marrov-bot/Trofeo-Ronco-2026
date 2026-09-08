@@ -24,7 +24,7 @@
       padding: 24px 15px 35px;
     }
 
-    /* Overlay scuro rinforzato per massima pulizia e contrasto */
+    /* Overlay scuro per contrasto e pulizia */
     .header-banner::before {
       content: "";
       position: absolute;
@@ -52,6 +52,12 @@
     .slide.active {
       opacity: 1;
     }
+
+    /* Regolazione altezza/posizione verticale foto specifiche */
+    .slide.foto2 { background-position: center 65%; } /* Abbassata */
+    .slide.foto4 { background-position: center 70%; } /* Abbassata */
+    .slide.foto5 { background-position: center 25%; } /* Alzata */
+    .slide.foto6 { background-position: center 65%; } /* Abbassata */
 
     /* Testi sopra le slide */
     .header-content {
@@ -276,15 +282,15 @@
   <div class="header-banner">
     <!-- Immagini dello Slideshow -->
     <div class="slides-container">
-      <div class="slide active" style="background-image: url('Foto1.JPG');"></div>
-      <div class="slide" style="background-image: url('Foto2.JPG');"></div>
-      <div class="slide" style="background-image: url('Foto3.JPG');"></div>
-      <div class="slide" style="background-image: url('Foto4.JPG');"></div>
-      <div class="slide" style="background-image: url('Foto5.JPG');"></div>
-      <div class="slide" style="background-image: url('Foto6.JPG');"></div>
-      <div class="slide" style="background-image: url('Foto7.JPG');"></div>
-      <div class="slide" style="background-image: url('Foto8.JPEG');"></div>
-      <div class="slide" style="background-image: url('Foto9.JPG');"></div>
+      <div class="slide foto1 active" style="background-image: url('Foto1.JPG');"></div>
+      <div class="slide foto2" style="background-image: url('Foto2.JPG');"></div>
+      <div class="slide foto3" style="background-image: url('Foto3.JPG');"></div>
+      <div class="slide foto4" style="background-image: url('Foto4.JPG');"></div>
+      <div class="slide foto5" style="background-image: url('Foto5.JPG');"></div>
+      <div class="slide foto6" style="background-image: url('Foto6.JPG');"></div>
+      <div class="slide foto7" style="background-image: url('Foto7.JPG');"></div>
+      <div class="slide foto8" style="background-image: url('Foto8.JPEG');"></div>
+      <div class="slide foto9" style="background-image: url('Foto9.JPG');"></div>
     </div>
 
     <!-- Contenuto Testuale sopra le immagini -->
@@ -371,7 +377,7 @@
     // --- Gestione Rotazione Foto (Transizione Dolce ogni 6 secondi) ---
     const slides = document.querySelectorAll('.slide');
     let currentSlide = 0;
-    const slideInterval = 6000; // 6 secondi tra un'immagine e l'altra
+    const slideInterval = 6000;
 
     function nextSlide() {
       slides[currentSlide].classList.remove('active');
