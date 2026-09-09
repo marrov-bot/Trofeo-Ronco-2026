@@ -146,6 +146,17 @@
     }
     input:focus, select:focus { outline: none; border-color: #38bdf8; background: #ffffff; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2); }
 
+    /* Stile Placeholder Grigio Leggero per Select non ancora selezionate */
+    select.placeholder-active {
+      color: #94a3b8;
+    }
+    select option {
+      color: #0f172a;
+    }
+    select option[disabled] {
+      color: #94a3b8;
+    }
+
     .field-hint {
       font-size: 11.5px;
       color: #64748b;
@@ -319,8 +330,8 @@
 
       <!-- Sezione Maglietta -->
       <label for="taglia">Maglietta Ufficiale (20€) *</label>
-      <select id="taglia" required onchange="toggleQuantita()">
-        <option value="" disabled selected>-- Vuoi ordinare la maglietta? --</option>
+      <select id="taglia" required class="placeholder-active" onchange="updateSelectStyle(this); toggleQuantita();">
+        <option value="" disabled selected>-- Seleziona un'opzione --</option>
         <option value="Nessuna">No, nessuna maglietta (Solo presenza / Pranzo)</option>
         <option value="S">Sì - Taglia S</option>
         <option value="M">Sì - Taglia M</option>
@@ -338,7 +349,7 @@
 
       <!-- Domanda Pranzo -->
       <label for="pranzo">Ti fermi a mangiare con noi? *</label>
-      <select id="pranzo" required>
+      <select id="pranzo" required class="placeholder-active" onchange="updateSelectStyle(this);">
         <option value="" disabled selected>-- Seleziona un'opzione --</option>
         <option value="No">No, sarò solo sul campo / spettatore</option>
         <option value="Sì (Solo io)">Sì (Solo io)</option>
@@ -374,10 +385,18 @@
       }, 6000);
     }
 
+    // Cambia il colore del testo della select da grigio leggero a scuro quando viene fatta una scelta
+    function updateSelectStyle(el) {
+      if (el.value === "") {
+        el.classList.add('placeholder-active');
+      } else {
+        el.classList.remove('placeholder-active');
+      }
+    }
+
     function toggleQuantita() {
       const taglia = document.getElementById('taglia').value;
       const qContainer = document.getElementById('quantitaContainer');
-      // Mostra la quantità solo se è stata scelta una taglia reale (diversa da vuoto e da Nessuna)
       qContainer.style.display = (taglia === '' || taglia === 'Nessuna') ? 'none' : 'block';
     }
 
@@ -441,6 +460,13 @@
 
     function resetForm() {
       document.getElementById('orderForm').reset();
+      
+      // Ripristina lo stile del placeholder grigio per i select
+      const selectTaglia = document.getElementById('taglia');
+      const selectPranzo = document.getElementById('pranzo');
+      updateSelectStyle(selectTaglia);
+      updateSelectStyle(selectPranzo);
+      
       toggleQuantita();
       document.getElementById('orderForm').style.display = 'block';
       document.getElementById('introText').style.display = 'block';
