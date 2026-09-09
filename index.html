@@ -112,18 +112,13 @@
       .main-card { margin-top: -35px; }
     }
 
-    /* Modificato font-size per stare su 1 riga su iPhone 16 Pro e mobile */
     .intro-text { 
-      font-size: 13px; 
+      font-size: 13.5px; 
       color: #64748b; 
-      line-height: 1.3; 
+      line-height: 1.4; 
       margin-bottom: 16px; 
       text-align: center;
-      white-space: nowrap;
-    }
-    
-    @media (max-width: 390px) {
-      .intro-text { font-size: 11.5px; }
+      font-weight: 500;
     }
 
     .badge-price {
@@ -136,7 +131,6 @@
       font-size: 12px;
       font-weight: 600;
       margin-top: 6px;
-      white-space: normal;
     }
     
     label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-top: 14px; margin-bottom: 6px; }
@@ -285,9 +279,8 @@
 
   <div class="main-card">
     
-    <!-- Testo compatto su riga unica per mobile -->
     <div class="intro-text" id="introText">
-      Preordina la maglietta e conferma la tua presenza
+      Preordina la maglietta ufficiale e conferma la presenza
       <div><span class="badge-price">Maglietta: 20€ • Pagamento al ritiro</span></div>
     </div>
 
@@ -342,14 +335,14 @@
 
       <hr class="section-divider">
 
-      <!-- Domanda Pranzo Aggiornata (Max 2 persone) -->
+      <!-- Domanda Pranzo -->
       <label for="pranzo">Ti fermi a mangiare con noi?</label>
       <select id="pranzo">
         <option value="No">No, sarò solo sul campo / spettatore</option>
         <option value="Sì (Solo io)">Sì (Solo io)</option>
         <option value="Sì (Io + 1 accompagnatore)">Sì (Io + 1 accompagnatore)</option>
       </select>
-      <div class="field-hint">Per gruppi più numerosi, fai compilare il form a ciascun partecipante!</div>
+      <div class="field-hint">Così ci organizziamo al meglio!</div>
 
       <button type="submit" id="submitBtn" class="btn-submit">
         Invia Conferma
