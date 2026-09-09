@@ -3,133 +3,171 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>7° Trofeo Ronco - Preordine & Adesione</title>
+  <title>7° Trofeo Ronco - Preordine Maglietta & Pranzo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --primary: #d90429;
-      --primary-hover: #ef233c;
-      --dark: #2b2d42;
-      --light: #f8f9fa;
-      --gray: #8d99ae;
+      --primary: #1b4332;
+      --primary-light: #2d6a4f;
+      --primary-dark: #081c15;
+      --accent: #d90429;
+      --accent-hover: #ef233c;
+      --bg-color: #f4f6f8;
       --card-bg: #ffffff;
-      --success-bg: #e8f5e9;
-      --success-border: #c8e6c9;
-      --success-text: #2e7d32;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border-color: #e5e7eb;
+      --success-bg: #f0fdf4;
+      --success-border: #bbf7d0;
+      --success-text: #166534;
+      --radius: 16px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     body {
-      background-color: #edf2f4;
-      color: var(--dark);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
       line-height: 1.6;
-      padding-bottom: 40px;
+      padding: 20px 12px 40px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
-    header {
-      background-color: var(--dark);
-      color: white;
+    .main-wrapper {
+      max-width: 580px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Header */
+    .header {
       text-align: center;
-      padding: 2.5rem 1rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-bottom: 24px;
+      padding: 10px 0;
     }
 
-    header h1 {
-      font-size: 2.2rem;
-      margin-bottom: 0.5rem;
-      color: #ffffff;
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      letter-spacing: -0.025em;
+      margin-bottom: 6px;
     }
 
-    header p {
-      color: var(--gray);
-      font-size: 1.1rem;
+    .header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-weight: 500;
     }
 
-    .container {
-      max-width: 800px;
-      margin: -20px auto 0;
-      padding: 0 15px;
+    /* Slider Foto */
+    .slider-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      position: relative;
+      border: 1px solid var(--border-color);
     }
 
-    /* Slider / Carosello Foto */
     .slider-container {
       position: relative;
-      max-width: 100%;
-      height: 350px;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      width: 100%;
+      height: 260px;
       background-color: #000;
-      margin-bottom: 25px;
+      overflow: hidden;
     }
 
     .slide {
-      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
       object-fit: cover;
     }
 
     .slide.active {
-      display: block;
+      opacity: 1;
     }
 
     .slider-btn {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
+      background: rgba(255, 255, 255, 0.85);
+      color: var(--primary-dark);
       border: none;
-      font-size: 1.8rem;
-      padding: 8px 15px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      font-weight: bold;
       cursor: pointer;
-      border-radius: 4px;
-      transition: background 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      transition: all 0.2s;
+      z-index: 10;
     }
 
     .slider-btn:hover {
-      background: rgba(0, 0, 0, 0.8);
+      background: #ffffff;
+      scale: 1.05;
     }
 
-    .prev { left: 10px; }
-    .next { right: 10px; }
+    .prev { left: 12px; }
+    .next { right: 12px; }
 
-    /* Box Info */
-    .info-box {
-      background-color: #eef9ff;
-      border-left: 4px solid #0077b6;
-      padding: 15px 20px;
-      border-radius: 6px;
-      margin-bottom: 25px;
-      font-size: 0.95rem;
+    .slider-dots {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 10;
     }
 
-    .info-box h4 {
-      color: #0077b6;
-      margin-bottom: 5px;
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: all 0.3s;
     }
 
-    /* Card Form e Modale */
-    .card {
+    .dot.active {
+      background: #ffffff;
+      width: 20px;
+      border-radius: 4px;
+    }
+
+    /* Card Form */
+    .form-card {
       background: var(--card-bg);
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      margin-bottom: 25px;
-    }
-
-    .card h2 {
-      font-size: 1.5rem;
-      margin-bottom: 15px;
-      color: var(--primary);
-      border-bottom: 2px solid #edf2f4;
-      padding-bottom: 8px;
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+      margin-bottom: 24px;
     }
 
     .form-group {
@@ -138,94 +176,115 @@
 
     .form-group label {
       display: block;
-      margin-bottom: 6px;
-      font-weight: 600;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 8px;
     }
 
-    .form-group input, 
-    .form-group select, 
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group select,
     .form-group textarea {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1rem;
-      transition: border-color 0.3s;
+      padding: 12px 16px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text-main);
+      background-color: #fafafa;
+      transition: all 0.2s;
     }
 
-    .form-group input:focus, 
-    .form-group select:focus, 
+    .form-group input:focus,
+    .form-group select:focus,
     .form-group textarea:focus {
       outline: none;
-      border-color: var(--primary);
+      border-color: var(--primary-light);
+      background-color: #ffffff;
+      box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.1);
     }
 
     .form-row {
       display: flex;
-      gap: 15px;
+      gap: 16px;
     }
 
     .form-row .form-group {
       flex: 1;
     }
 
-    button.btn-submit {
+    .btn-submit {
       width: 100%;
       background-color: var(--primary);
       color: white;
-      padding: 14px;
       border: none;
-      border-radius: 6px;
-      font-size: 1.1rem;
-      font-weight: bold;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(27, 67, 50, 0.2);
     }
 
-    button.btn-submit:hover {
-      background-color: var(--primary-hover);
+    .btn-submit:hover {
+      background-color: var(--primary-light);
+      transform: translateY(-1px);
     }
 
-    /* Schermata di Conferma (Layout Card Verde dallo Screenshot) */
+    .btn-submit:disabled {
+      background-color: var(--text-muted);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Schermata di Conferma Verde */
     .confirmation-card {
       display: none;
       background-color: var(--success-bg);
-      border: 1px solid var(--success-border);
-      border-radius: 16px;
-      padding: 30px 20px;
+      border: 1.5px solid var(--success-border);
+      border-radius: var(--radius);
+      padding: 32px 24px;
       text-align: center;
-      margin-bottom: 25px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
     }
 
-    .confirmation-card .icon-party {
+    .confirmation-card .party-icon {
       font-size: 3rem;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .confirmation-card h2 {
-      color: #1b4332;
-      font-size: 1.8rem;
-      margin-bottom: 5px;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--success-text);
+      margin-bottom: 6px;
     }
 
-    .confirmation-card p.subhead {
-      color: #2d6a4f;
-      font-size: 1rem;
-      margin-bottom: 20px;
+    .confirmation-card p.subtitle {
+      color: #15803d;
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 24px;
     }
 
     .summary-box {
       background: #ffffff;
-      border: 2px dashed #a3b18a;
+      border: 1.5px dashed #86efac;
       border-radius: 12px;
-      padding: 18px;
+      padding: 18px 20px;
       text-align: left;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .summary-box h3 {
-      font-size: 1.1rem;
-      color: #1b4332;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--success-text);
       margin-bottom: 10px;
     }
 
@@ -234,14 +293,14 @@
     }
 
     .summary-box ul li {
-      margin-bottom: 6px;
-      color: #2b2d42;
       font-size: 0.95rem;
+      color: #1f2937;
+      margin-bottom: 6px;
     }
 
     .confirmation-details {
       text-align: left;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .confirmation-details ul {
@@ -249,94 +308,116 @@
     }
 
     .confirmation-details ul li {
+      font-size: 0.92rem;
+      color: #166534;
       margin-bottom: 12px;
-      font-size: 0.95rem;
-      color: #2d6a4f;
-      line-height: 1.4;
+      line-height: 1.5;
+      position: relative;
+      padding-left: 20px;
+    }
+
+    .confirmation-details ul li::before {
+      content: "•";
+      position: absolute;
+      left: 4px;
+      font-weight: bold;
+      font-size: 1.2rem;
     }
 
     .confirmation-details ul li strong {
-      color: #1b4332;
+      color: #14532d;
     }
 
     .footer-note {
-      font-weight: bold;
-      color: #1b4332;
+      font-weight: 800;
+      color: var(--success-text);
       font-size: 1.1rem;
       margin-bottom: 20px;
     }
 
     .btn-reset {
       background-color: #ffffff;
-      color: #2d6a4f;
-      border: 1px solid #a3b18a;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: 600;
+      color: var(--success-text);
+      border: 1.5px solid #86efac;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s;
     }
 
     .btn-reset:hover {
-      background-color: #f1f8f5;
+      background-color: #f0fdf4;
     }
 
     footer {
       text-align: center;
-      margin-top: 30px;
-      font-size: 0.9rem;
-      color: var(--gray);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: auto;
+      padding-top: 20px;
     }
 
-    @media (max-width: 600px) {
+    footer a {
+      color: var(--text-muted);
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .slider-container {
+        height: 200px;
+      }
+      .form-card, .confirmation-card {
+        padding: 20px 16px;
+      }
       .form-row {
         flex-direction: column;
         gap: 0;
-      }
-      .slider-container {
-        height: 220px;
       }
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>7° Trofeo Ronco</h1>
-    <p>Iscrizione Evento, Preordine Magliette & Adesione Pranzo</p>
-  </header>
-
-  <div class="container">
+  <div class="main-wrapper">
     
-    <!-- Galleria Foto -->
-    <div class="slider-container">
-      <img class="slide active" src="https://via.placeholder.com/800x350/d90429/ffffff?text=Trofeo+Ronco+1" alt="Foto 1">
-      <img class="slide" src="https://via.placeholder.com/800x350/2b2d42/ffffff?text=Trofeo+Ronco+2" alt="Foto 2">
-      <img class="slide" src="https://via.placeholder.com/800x350/8d99ae/ffffff?text=Trofeo+Ronco+3" alt="Foto 3">
-      <button class="slider-btn prev" onclick="moveSlide(-1)">&#10094;</button>
-      <button class="slider-btn next" onclick="moveSlide(1)">&#10095;</button>
+    <!-- Header -->
+    <header class="header">
+      <h1>7° Trofeo Ronco</h1>
+      <p>Iscrizione Evento, Preordine Magliette & Adesione Pranzo</p>
+    </header>
+
+    <!-- Galleria Foto Carousel -->
+    <div class="slider-card">
+      <div class="slider-container">
+        <img class="slide active" src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=800&q=80" alt="Enduro 1">
+        <img class="slide" src="https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=800&q=80" alt="Enduro 2">
+        <img class="slide" src="https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80" alt="Enduro 3">
+        
+        <button class="slider-btn prev" onclick="moveSlide(-1)">&#10094;</button>
+        <button class="slider-btn next" onclick="moveSlide(1)">&#10095;</button>
+
+        <div class="slider-dots">
+          <span class="dot active" onclick="setSlide(0)"></span>
+          <span class="dot" onclick="setSlide(1)"></span>
+          <span class="dot" onclick="setSlide(2)"></span>
+        </div>
+      </div>
     </div>
 
-    <!-- Box Info Preordine & Beneficenza -->
-    <div class="info-box">
-      <h4>📌 Info su Ritiro Magliette e Solidarietà</h4>
-      <p>Il versamento della quota della maglietta (20€) avverrà direttamente al banco dell'evento ed è a copertura pura dei costi di realizzazione. Troverai inoltre il banco dedicato a chi desidera sostenere le nostre iniziative di solidarietà con un'offerta libera.</p>
-    </div>
-
-    <!-- Card Form Iscrizione -->
-    <div class="card" id="formCard">
-      <h2>Modulo di Partecipazione</h2>
+    <!-- Form Iscrizione -->
+    <div class="form-card" id="formCard">
       <form id="bookingForm">
         
         <div class="form-group">
           <label for="nome">Nome e Cognome *</label>
-          <input type="text" id="nome" name="nome" placeholder="Inserisci il tuo nome e cognome" required>
+          <input type="text" id="nome" name="nome" placeholder="Es. Mario Rossi" required>
         </div>
 
         <div class="form-group">
           <label for="email">Indirizzo Email *</label>
-          <input type="email" id="email" name="email" placeholder="esempio@email.com" required>
+          <input type="email" id="email" name="email" placeholder="nome@esempio.it" required>
         </div>
 
         <div class="form-row">
@@ -353,8 +434,14 @@
           </div>
 
           <div class="form-group">
-            <label for="quantita">Quantità Magliette</label>
-            <input type="number" id="quantita" name="quantita" value="1" min="1" max="10">
+            <label for="quantita">Quantità</label>
+            <select id="quantita" name="quantita">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
           </div>
         </div>
 
@@ -367,19 +454,19 @@
         </div>
 
         <div class="form-group">
-          <label for="notePranzo">Note particolari o Intolleranze</label>
-          <textarea id="notePranzo" name="notePranzo" rows="3" placeholder="Segnala qui eventuali allergie, intolleranze o note per l'organizzazione..."></textarea>
+          <label for="notePranzo">Note o Intolleranze per il pranzo</label>
+          <textarea id="notePranzo" name="notePranzo" rows="2" placeholder="Es. vegetariano, allergia al glutine, ecc."></textarea>
         </div>
 
-        <button type="submit" class="btn-submit" id="submitBtn">Invia Prenotazione</button>
+        <button type="submit" class="btn-submit" id="submitBtn">Invia Registrazione</button>
       </form>
     </div>
 
-    <!-- Card Schermata di Conferma (Sostituisce la vista form dopo l'invio) -->
+    <!-- Schermata di Conferma Registrata (Verde) -->
     <div class="confirmation-card" id="confirmationCard">
-      <div class="icon-party">🎉</div>
+      <div class="party-icon">🎉</div>
       <h2>Conferma registrata!</h2>
-      <p class="subhead">Ti abbiamo inviato un'email di riepilogo.</p>
+      <p class="subtitle">Ti abbiamo inviato un'email di riepilogo.</p>
 
       <div class="summary-box">
         <h3>Riepilogo:</h3>
@@ -392,9 +479,9 @@
 
       <div class="confirmation-details">
         <ul>
-          <li>• <strong>Ritiro e Pagamento:</strong> Se hai ordinato la maglietta, la salderai al banco dell'evento (20€ a maglietta, a pura copertura dei costi vivi).</li>
-          <li>• <strong>Beneficenza & Solidarietà:</strong> Troverai il banco dedicato a chi desidera sostenere le nostre iniziative con un'offerta libera.</li>
-          <li>• <strong>Comunicazioni:</strong> Utilizzeremo la tua email per inviarti eventuali aggiornamenti sull'evento.</li>
+          <li><strong>Ritiro e Pagamento:</strong> Il ritiro e il versamento della quota (20€ a maglietta) avverranno direttamente al banco dell'evento.</li>
+          <li><strong>Comunicazioni:</strong> Utilizzeremo la tua email per eventuali aggiornamenti sull'evento.</li>
+          <li><strong>Beneficenza:</strong> Troverai anche il banco dedicato a chi desidera sostenere le nostre iniziative di solidarietà con un'offerta libera.</li>
         </ul>
       </div>
 
@@ -410,31 +497,40 @@
   </footer>
 
   <script>
-    // Sostituisci con l'URL del tuo Apps Script Web App
+    // Inserisci qui l'URL del tuo Google Apps Script
     const SCRIPT_URL = "https://script.google.com/macros/s/TUO_SCRIPT_ID_HERE/exec";
 
-    // Gestione Carosello Foto
-    let slideIndex = 0;
+    /* Gestione Slider Foto */
+    let currentSlide = 0;
     const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
 
     function showSlide(index) {
-      slides.forEach(s => s.classList.remove('active'));
-      if (index >= slides.length) slideIndex = 0;
-      if (index < 0) slideIndex = slides.length - 1;
-      slides[slideIndex].classList.add('active');
+      if (index >= slides.length) currentSlide = 0;
+      else if (index < 0) currentSlide = slides.length - 1;
+      else currentSlide = index;
+
+      slides.forEach((s, i) => {
+        s.classList.toggle('active', i === currentSlide);
+      });
+      dots.forEach((d, i) => {
+        d.classList.toggle('active', i === currentSlide);
+      });
     }
 
     function moveSlide(step) {
-      slideIndex += step;
-      showSlide(slideIndex);
+      showSlide(currentSlide + step);
+    }
+
+    function setSlide(index) {
+      showSlide(index);
     }
 
     setInterval(() => {
-      slideIndex++;
-      showSlide(slideIndex);
-    }, 5000);
+      moveSlide(1);
+    }, 4500);
 
-    // Gestione Invio e Passaggio a Schermata Conferma
+    /* Gestione Form ed Invio */
     const form = document.getElementById('bookingForm');
     const submitBtn = document.getElementById('submitBtn');
     const formCard = document.getElementById('formCard');
@@ -453,12 +549,12 @@
       const valPranzo = document.getElementById('pranzo').value;
       const valNote = document.getElementById('notePranzo').value;
 
-      // Popola i campi del riepilogo grafico
+      // Aggiorna Riepilogo Grafico
       document.getElementById('summaryNome').innerText = valNome;
       document.getElementById('summaryMaglia').innerText = valTaglia !== 'Nessuna' ? valTaglia + " (x" + valQuantita + ")" : "Nessuna";
       document.getElementById('summaryPranzo').innerText = valPranzo;
 
-      // Preparazione payload per invio
+      // Payload FormData compatibile con Apps Script
       const formData = new URLSearchParams();
       formData.append('nome', valNome);
       formData.append('email', valEmail);
@@ -476,23 +572,22 @@
         body: formData.toString()
       })
       .then(() => {
-        // Mostra la scheda di conferma e nasconde il form
         formCard.style.display = 'none';
         confirmationCard.style.display = 'block';
-        window.scrollTo({ top: confirmationCard.offsetTop - 30, behavior: 'smooth' });
+        window.scrollTo({ top: confirmationCard.offsetTop - 20, behavior: 'smooth' });
       })
       .catch(error => {
-        console.error('Errore durante l\'invio:', error);
-        alert('Si è verificato un errore durante l\'invio. Riprova.');
+        console.error('Errore invio:', error);
+        alert('Si è verificato un problema con l\'invio. Riprova.');
         submitBtn.disabled = false;
-        submitBtn.innerText = "Invia Prenotazione";
+        submitBtn.innerText = "Invia Registrazione";
       });
     });
 
     function resetFormView() {
       form.reset();
       submitBtn.disabled = false;
-      submitBtn.innerText = "Invia Prenotazione";
+      submitBtn.innerText = "Invia Registrazione";
       confirmationCard.style.display = 'none';
       formCard.style.display = 'block';
     }
