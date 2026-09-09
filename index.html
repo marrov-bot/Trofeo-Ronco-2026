@@ -112,27 +112,16 @@
       .main-card { margin-top: -35px; }
     }
 
+    /* Incipit in risalto */
     .intro-text { 
-      font-size: 13.5px; 
-      color: #64748b; 
+      font-size: 15px; 
+      color: #1e293b; 
       line-height: 1.4; 
-      margin-bottom: 16px; 
+      margin-bottom: 18px; 
       text-align: center;
-      font-weight: 500;
+      font-weight: 600;
     }
 
-    .badge-price {
-      display: inline-block;
-      background-color: #f0f9ff;
-      color: #0369a1;
-      border: 1px solid #bae6fd;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      margin-top: 6px;
-    }
-    
     label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-top: 14px; margin-bottom: 6px; }
     input, select {
       width: 100%;
@@ -292,7 +281,6 @@
     
     <div class="intro-text" id="introText">
       Preordina la maglietta ufficiale e conferma la presenza
-      <div><span class="badge-price">Maglietta: 20€ • Pagamento al ritiro</span></div>
     </div>
 
     <!-- Box Esito -->
@@ -309,7 +297,7 @@
       </div>
 
       <ul class="info-list">
-        <li id="infoRitiro"><strong>Ritiro e Pagamento:</strong> La maglietta viene realizzata su misura. Il ritiro e il versamento della quota (20€ a maglietta) avverranno direttamente al banco dell'evento.</li>
+        <li id="infoRitiro"><strong>Ritiro e Pagamento:</strong> La maglietta viene realizzata su misura in base alla prenotazione. Il ritiro e il versamento della quota (20€ a maglietta) avverranno direttamente al banco dell'evento.</li>
         <li><strong>Beneficenza:</strong> Troverai anche il banco dedicato a chi desidera sostenere le nostre iniziative di solidarietà con un'offerta libera.</li>
         <li><strong>Comunicazioni:</strong> Utilizzeremo la tua email per aggiornarti tempestivamente su orari e indicazioni meteo.</li>
       </ul>
@@ -339,6 +327,7 @@
         <option value="XL">Sì - Taglia XL</option>
         <option value="XXL">Sì - Taglia XXL</option>
       </select>
+      <div class="field-hint">Pagamento direttamente al ritiro sul campo</div>
 
       <div id="quantitaContainer" style="display: none;">
         <label for="quantita">Quantità Magliette</label>
