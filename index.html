@@ -8,7 +8,7 @@
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { margin: 0; padding: 0; background-color: #f0f4f8; color: #2d3748; }
     
-    /* Contenitore Banner con Slideshow Minimal */
+    /* Banner Slideshow Minimal */
     .header-banner {
       position: relative;
       width: 100%;
@@ -24,7 +24,6 @@
       padding: 24px 15px 35px;
     }
 
-    /* Overlay scuro per contrasto */
     .header-banner::before {
       content: "";
       position: absolute;
@@ -34,7 +33,6 @@
       pointer-events: none;
     }
 
-    /* Singola Slide */
     .slides-container {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -51,13 +49,12 @@
     }
     .slide.active { opacity: 1; }
 
-    /* Regolazioni altezze foto specifiche */
+    /* Altezze personalizzate foto */
     .slide.foto2 { background-position: center 65%; }
     .slide.foto4 { background-position: center 70%; }
     .slide.foto5 { background-position: center 25%; }
     .slide.foto6 { background-position: center 65%; }
 
-    /* Testi sopra il banner */
     .header-content {
       position: relative;
       z-index: 3;
@@ -101,7 +98,7 @@
       margin: -25px auto 30px;
       background: #ffffff;
       border-radius: 18px;
-      padding: 26px;
+      padding: 24px;
       box-shadow: 0 12px 30px rgba(148, 163, 184, 0.25);
       position: relative;
       z-index: 10;
@@ -115,13 +112,20 @@
       .main-card { margin-top: -35px; }
     }
 
+    /* Modificato font-size per stare su 1 riga su iPhone 16 Pro e mobile */
     .intro-text { 
-      font-size: 14px; 
+      font-size: 13px; 
       color: #64748b; 
-      line-height: 1.5; 
-      margin-bottom: 18px; 
-      text-align: center; 
+      line-height: 1.3; 
+      margin-bottom: 16px; 
+      text-align: center;
+      white-space: nowrap;
     }
+    
+    @media (max-width: 390px) {
+      .intro-text { font-size: 11.5px; }
+    }
+
     .badge-price {
       display: inline-block;
       background-color: #f0f9ff;
@@ -132,6 +136,7 @@
       font-size: 12px;
       font-weight: 600;
       margin-top: 6px;
+      white-space: normal;
     }
     
     label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-top: 14px; margin-bottom: 6px; }
@@ -158,7 +163,7 @@
       border: 0;
       height: 1px;
       background: #e2e8f0;
-      margin: 20px 0 10px 0;
+      margin: 18px 0 8px 0;
     }
 
     .btn-submit {
@@ -170,7 +175,7 @@
       border-radius: 10px;
       font-size: 16px;
       font-weight: 700;
-      margin-top: 24px;
+      margin-top: 22px;
       cursor: pointer;
       box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
       transition: background 0.2s ease;
@@ -178,7 +183,6 @@
     .btn-submit:hover { background: #0369a1; }
     .btn-submit:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
 
-    /* Card di esito positivo */
     .success-box {
       display: none;
       background: #ecfdf5;
@@ -239,7 +243,6 @@
 
     .footer-access { margin-top: 24px; text-align: center; font-size: 12px; color: #94a3b8; }
     .footer-access span { cursor: pointer; text-decoration: underline; }
-    .footer-access span:hover { color: #64748b; }
 
     .table-container {
       display: none;
@@ -247,7 +250,6 @@
       border-radius: 10px;
       overflow: hidden;
       border: 1px solid #bae6fd;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     iframe { width: 100%; height: 280px; border: none; }
 
@@ -283,8 +285,9 @@
 
   <div class="main-card">
     
+    <!-- Testo compatto su riga unica per mobile -->
     <div class="intro-text" id="introText">
-      Preordina la maglietta ufficiale e conferma la tua presenza!
+      Preordina la maglietta e conferma la tua presenza
       <div><span class="badge-price">Maglietta: 20€ • Pagamento al ritiro</span></div>
     </div>
 
@@ -292,7 +295,7 @@
     <div id="successBox" class="success-box">
       <div class="icon">🎉</div>
       <h3>Conferma registrata!</h3>
-      <p>Ti abbiamo inviato un'email con il riepilogo della tua registrazione.</p>
+      <p>Ti abbiamo inviato un'email di riepilogo.</p>
       
       <div class="summary-card">
         <p><strong>Riepilogo:</strong></p>
@@ -302,9 +305,9 @@
       </div>
 
       <ul class="info-list">
-        <li><strong>Ritiro e Pagamento:</strong> Se hai ordinato la maglietta, la potrai ritirare e saldare direttamente al banco dell'evento.</li>
-        <li><strong>Comunicazioni:</strong> Utilizzeremo la tua email per eventuali aggiornamenti sull'evento o sulle condizioni meteo.</li>
-        <li><strong>Beneficenza:</strong> Tutto il ricavato dell'evento andrà a sostegno dei progetti sociali e degli amici a 4 zampe!</li>
+        <li><strong>Ritiro e Pagamento:</strong> Se hai ordinato la maglietta, la salderai al banco dell'evento (20€).</li>
+        <li><strong>Comunicazioni:</strong> Utilizzeremo la tua email per eventuali aggiornamenti sull'evento.</li>
+        <li><strong>Beneficenza:</strong> Il ricavato andrà a sostegno dei progetti sociali e amici a 4 zampe!</li>
       </ul>
 
       <p style="font-weight: bold; color: #065f46; margin: 12px 0 16px;">Ci vediamo sul campo! 👕🍖</p>
@@ -321,7 +324,7 @@
 
       <hr class="section-divider">
 
-      <!-- Campo Maglietta (Con opzione "Nessuna") -->
+      <!-- Sezione Maglietta -->
       <label for="taglia">Maglietta Ufficiale (20€)</label>
       <select id="taglia" onchange="toggleQuantita()">
         <option value="Nessuna">Nessuna maglietta (Solo presenza / Pranzo)</option>
@@ -339,15 +342,14 @@
 
       <hr class="section-divider">
 
-      <!-- Campo Pranzo -->
-      <label for="pranzo">Presenza al Pranzo (Grigliata)</label>
+      <!-- Domanda Pranzo Aggiornata (Max 2 persone) -->
+      <label for="pranzo">Ti fermi a mangiare con noi?</label>
       <select id="pranzo">
-        <option value="No">No, sarò solo sul campo/spettatore</option>
-        <option value="Sì (1 persona)">Sì, ci sono (1 persona)</option>
-        <option value="Sì (2 persone)">Sì, 2 persone</option>
-        <option value="Sì (3+ persone)">Sì, gruppo (3+ persone)</option>
+        <option value="No">No, sarò solo sul campo / spettatore</option>
+        <option value="Sì (Solo io)">Sì (Solo io)</option>
+        <option value="Sì (Io + 1 accompagnatore)">Sì (Io + 1 accompagnatore)</option>
       </select>
-      <div class="field-hint">Ci aiuta a stimare i coperti per la grigliata delle 13:00.</div>
+      <div class="field-hint">Per gruppi più numerosi, fai compilare il form a ciascun partecipante!</div>
 
       <button type="submit" id="submitBtn" class="btn-submit">
         Invia Conferma
@@ -377,14 +379,12 @@
       }, 6000);
     }
 
-    // Mostra/Nascondi quantità maglietta
     function toggleQuantita() {
       const taglia = document.getElementById('taglia').value;
       const qContainer = document.getElementById('quantitaContainer');
       qContainer.style.display = (taglia === 'Nessuna') ? 'none' : 'block';
     }
 
-    // Invio Dati
     const scriptURL = 'https://script.google.com/macros/s/AKfycby2hyW6nqdssrr3LibPG2J8f5c34G_66fQrBGzK6W2bnF0FUndPmv9IpoblB17Mh4L5sw/exec';
     let isAuthenticated = false;
 
