@@ -318,14 +318,15 @@
       <hr class="section-divider">
 
       <!-- Sezione Maglietta -->
-      <label for="taglia">Maglietta Ufficiale (20€)</label>
-      <select id="taglia" onchange="toggleQuantita()">
-        <option value="Nessuna">Nessuna maglietta (Solo presenza / Pranzo)</option>
-        <option value="S">Taglia S</option>
-        <option value="M">Taglia M</option>
-        <option value="L">Taglia L</option>
-        <option value="XL">Taglia XL</option>
-        <option value="XXL">Taglia XXL</option>
+      <label for="taglia">Maglietta Ufficiale (20€) *</label>
+      <select id="taglia" required onchange="toggleQuantita()">
+        <option value="" disabled selected>-- Vuoi ordinare la maglietta? --</option>
+        <option value="Nessuna">No, nessuna maglietta (Solo presenza / Pranzo)</option>
+        <option value="S">Sì - Taglia S</option>
+        <option value="M">Sì - Taglia M</option>
+        <option value="L">Sì - Taglia L</option>
+        <option value="XL">Sì - Taglia XL</option>
+        <option value="XXL">Sì - Taglia XXL</option>
       </select>
 
       <div id="quantitaContainer" style="display: none;">
@@ -336,8 +337,9 @@
       <hr class="section-divider">
 
       <!-- Domanda Pranzo -->
-      <label for="pranzo">Ti fermi a mangiare con noi?</label>
-      <select id="pranzo">
+      <label for="pranzo">Ti fermi a mangiare con noi? *</label>
+      <select id="pranzo" required>
+        <option value="" disabled selected>-- Seleziona un'opzione --</option>
         <option value="No">No, sarò solo sul campo / spettatore</option>
         <option value="Sì (Solo io)">Sì (Solo io)</option>
         <option value="Sì (Io + 1 accompagnatore)">Sì (Io + 1 accompagnatore)</option>
@@ -375,7 +377,8 @@
     function toggleQuantita() {
       const taglia = document.getElementById('taglia').value;
       const qContainer = document.getElementById('quantitaContainer');
-      qContainer.style.display = (taglia === 'Nessuna') ? 'none' : 'block';
+      // Mostra la quantità solo se è stata scelta una taglia reale (diversa da vuoto e da Nessuna)
+      qContainer.style.display = (taglia === '' || taglia === 'Nessuna') ? 'none' : 'block';
     }
 
     const scriptURL = 'https://script.google.com/macros/s/AKfycby2hyW6nqdssrr3LibPG2J8f5c34G_66fQrBGzK6W2bnF0FUndPmv9IpoblB17Mh4L5sw/exec';
@@ -390,7 +393,7 @@
       const nomeVal = document.getElementById('nome').value;
       const emailVal = document.getElementById('email').value;
       const tagliaVal = document.getElementById('taglia').value;
-      const quantitaVal = (tagliaVal === 'Nessuna') ? 0 : document.getElementById('quantita').value;
+      const quantitaVal = (tagliaVal === 'Nessuna' || tagliaVal === '') ? 0 : document.getElementById('quantita').value;
       const pranzoVal = document.getElementById('pranzo').value;
 
       btn.disabled = true;
