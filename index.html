@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trofeo Ronco 2026 - Preordine Maglietta</title>
+  <title>Trofeo Ronco 2026 - Preordine & Presenze</title>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { margin: 0; padding: 0; background-color: #f0f4f8; color: #2d3748; }
@@ -24,7 +24,7 @@
       padding: 24px 15px 35px;
     }
 
-    /* Overlay scuro per contrasto e pulizia */
+    /* Overlay scuro per contrasto */
     .header-banner::before {
       content: "";
       position: absolute;
@@ -49,17 +49,15 @@
       opacity: 0;
       transition: opacity 1.5s ease-in-out;
     }
-    .slide.active {
-      opacity: 1;
-    }
+    .slide.active { opacity: 1; }
 
-    /* Regolazione altezza/posizione verticale foto specifiche */
-    .slide.foto2 { background-position: center 65%; } /* Abbassata */
-    .slide.foto4 { background-position: center 70%; } /* Abbassata */
-    .slide.foto5 { background-position: center 25%; } /* Alzata */
-    .slide.foto6 { background-position: center 65%; } /* Abbassata */
+    /* Regolazioni altezze foto specifiche */
+    .slide.foto2 { background-position: center 65%; }
+    .slide.foto4 { background-position: center 70%; }
+    .slide.foto5 { background-position: center 25%; }
+    .slide.foto6 { background-position: center 65%; }
 
-    /* Testi sopra le slide */
+    /* Testi sopra il banner */
     .header-content {
       position: relative;
       z-index: 3;
@@ -110,22 +108,11 @@
       border: 1px solid #e2e8f0;
     }
 
-    /* Adattamento per PC */
     @media (min-width: 768px) {
-      .header-banner {
-        height: 38vh;
-        max-height: 420px;
-        padding: 30px 15px 45px;
-      }
-      .header-banner h1 {
-        font-size: 34px;
-      }
-      .header-banner p.date {
-        font-size: 16px;
-      }
-      .main-card {
-        margin-top: -35px;
-      }
+      .header-banner { height: 38vh; max-height: 420px; padding: 30px 15px 45px; }
+      .header-banner h1 { font-size: 34px; }
+      .header-banner p.date { font-size: 16px; }
+      .main-card { margin-top: -35px; }
     }
 
     .intro-text { 
@@ -167,6 +154,13 @@
       line-height: 1.3;
     }
 
+    .section-divider {
+      border: 0;
+      height: 1px;
+      background: #e2e8f0;
+      margin: 20px 0 10px 0;
+    }
+
     .btn-submit {
       width: 100%;
       background: #0284c7;
@@ -184,7 +178,7 @@
     .btn-submit:hover { background: #0369a1; }
     .btn-submit:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
 
-    /* Scheda di conferma */
+    /* Card di esito positivo */
     .success-box {
       display: none;
       background: #ecfdf5;
@@ -207,11 +201,7 @@
       text-align: left;
       margin-bottom: 16px;
     }
-    .summary-card p {
-      margin: 4px 0;
-      font-size: 14px;
-      color: #1e293b;
-    }
+    .summary-card p { margin: 4px 0; font-size: 14px; color: #1e293b; }
     .summary-card strong { color: #047857; }
 
     .info-list {
@@ -222,9 +212,7 @@
       padding-left: 18px;
       line-height: 1.5;
     }
-    .info-list li {
-      margin-bottom: 8px;
-    }
+    .info-list li { margin-bottom: 8px; }
 
     .btn-reset {
       background: transparent;
@@ -249,16 +237,8 @@
       margin-top: 16px;
     }
 
-    .footer-access {
-      margin-top: 24px;
-      text-align: center;
-      font-size: 12px;
-      color: #94a3b8;
-    }
-    .footer-access span {
-      cursor: pointer;
-      text-decoration: underline;
-    }
+    .footer-access { margin-top: 24px; text-align: center; font-size: 12px; color: #94a3b8; }
+    .footer-access span { cursor: pointer; text-decoration: underline; }
     .footer-access span:hover { color: #64748b; }
 
     .table-container {
@@ -280,7 +260,6 @@
 <body>
 
   <div class="header-banner">
-    <!-- Immagini dello Slideshow -->
     <div class="slides-container">
       <div class="slide foto1 active" style="background-image: url('Foto1.JPG');"></div>
       <div class="slide foto2" style="background-image: url('Foto2.JPG');"></div>
@@ -293,7 +272,6 @@
       <div class="slide foto9" style="background-image: url('Foto9.JPG');"></div>
     </div>
 
-    <!-- Contenuto Testuale sopra le immagini -->
     <div class="header-content">
       <div class="header-top">
         <h1>Trofeo Ronco 2026</h1>
@@ -306,64 +284,78 @@
   <div class="main-card">
     
     <div class="intro-text" id="introText">
-      Preordina la maglietta ufficiale del Trofeo Ronco.
-      <div><span class="badge-price">Quota maglietta: 20€ • Ritiro all'evento</span></div>
+      Preordina la maglietta ufficiale e conferma la tua presenza!
+      <div><span class="badge-price">Maglietta: 20€ • Pagamento al ritiro</span></div>
     </div>
 
-    <!-- Box di esito positivo -->
+    <!-- Box Esito -->
     <div id="successBox" class="success-box">
       <div class="icon">🎉</div>
-      <h3>Preordine registrato!</h3>
-      <p>Ti abbiamo inviato un'email di conferma con il riepilogo del tuo ordine.</p>
+      <h3>Conferma registrata!</h3>
+      <p>Ti abbiamo inviato un'email con il riepilogo della tua registrazione.</p>
       
       <div class="summary-card">
-        <p><strong>Riepilogo Preordine:</strong></p>
+        <p><strong>Riepilogo:</strong></p>
         <p>• Nome: <span id="resNome"></span></p>
-        <p>• Email: <span id="resEmail"></span></p>
-        <p>• Taglia: <span id="resTaglia"></span></p>
-        <p>• Quantità: <span id="resQuantita"></span></p>
+        <p>• Maglietta: <span id="resMaglia"></span></p>
+        <p>• Pranzo: <span id="resPranzo"></span></p>
       </div>
 
       <ul class="info-list">
-        <li><strong>Produzione e Ritiro:</strong> La maglietta verrà realizzata su misura e la potrai ritirare al banco dell'evento (quota: <strong>20€</strong>).</li>
-        <li><strong>Comunicazioni:</strong> Utilizzeremo la tua email per avvisarti tempestivamente di eventuali novità o informazioni sull'evento.</li>
-        <li><strong>Solidarietà:</strong> Troverai anche il banco per le offerte libere a sostegno dei nostri progetti sociali.</li>
+        <li><strong>Ritiro e Pagamento:</strong> Se hai ordinato la maglietta, la potrai ritirare e saldare direttamente al banco dell'evento.</li>
+        <li><strong>Comunicazioni:</strong> Utilizzeremo la tua email per eventuali aggiornamenti sull'evento o sulle condizioni meteo.</li>
+        <li><strong>Beneficenza:</strong> Tutto il ricavato dell'evento andrà a sostegno dei progetti sociali e degli amici a 4 zampe!</li>
       </ul>
 
-      <p style="font-weight: bold; color: #065f46; margin: 12px 0 16px;">Ci vediamo sul campo! 👕👍</p>
+      <p style="font-weight: bold; color: #065f46; margin: 12px 0 16px;">Ci vediamo sul campo! 👕🍖</p>
 
-      <button type="button" class="btn-reset" onclick="resetForm()">Effettua un altro preordine</button>
+      <button type="button" class="btn-reset" onclick="resetForm()">Invia un'altra registrazione</button>
     </div>
 
     <form id="orderForm" onsubmit="submitOrder(event)">
-      <label for="nome">Nome e Cognome</label>
+      <label for="nome">Nome e Cognome *</label>
       <input type="text" id="nome" required placeholder="Es. Marco Rossi">
 
-      <label for="email">Email</label>
+      <label for="email">Email *</label>
       <input type="email" id="email" required placeholder="Es. marco@esempio.it">
-      <div class="field-hint">Per la conferma e per eventuali comunicazioni sull'evento (es. variazioni o info meteo).</div>
 
-      <label for="taglia">Taglia Maglietta</label>
-      <select id="taglia" required>
-        <option value="">Seleziona la tua taglia</option>
-        <option value="S">S</option>
-        <option value="M">M</option>
-        <option value="L">L</option>
-        <option value="XL">XL</option>
-        <option value="XXL">XXL</option>
+      <hr class="section-divider">
+
+      <!-- Campo Maglietta (Con opzione "Nessuna") -->
+      <label for="taglia">Maglietta Ufficiale (20€)</label>
+      <select id="taglia" onchange="toggleQuantita()">
+        <option value="Nessuna">Nessuna maglietta (Solo presenza / Pranzo)</option>
+        <option value="S">Taglia S</option>
+        <option value="M">Taglia M</option>
+        <option value="L">Taglia L</option>
+        <option value="XL">Taglia XL</option>
+        <option value="XXL">Taglia XXL</option>
       </select>
 
-      <label for="quantita">Quantità</label>
-      <input type="number" id="quantita" min="1" value="1" required>
+      <div id="quantitaContainer" style="display: none;">
+        <label for="quantita">Quantità Magliette</label>
+        <input type="number" id="quantita" min="1" value="1">
+      </div>
+
+      <hr class="section-divider">
+
+      <!-- Campo Pranzo -->
+      <label for="pranzo">Presenza al Pranzo (Grigliata)</label>
+      <select id="pranzo">
+        <option value="No">No, sarò solo sul campo/spettatore</option>
+        <option value="Sì (1 persona)">Sì, ci sono (1 persona)</option>
+        <option value="Sì (2 persone)">Sì, 2 persone</option>
+        <option value="Sì (3+ persone)">Sì, gruppo (3+ persone)</option>
+      </select>
+      <div class="field-hint">Ci aiuta a stimare i coperti per la grigliata delle 13:00.</div>
 
       <button type="submit" id="submitBtn" class="btn-submit">
-        Conferma Preordine
+        Invia Conferma
       </button>
 
       <div id="errorBox" class="error-box">Si è verificato un errore. Riprova più tardi.</div>
     </form>
 
-    <!-- Accesso di gestione -->
     <div class="footer-access">
       © Trofeo Ronco 2026 • <span onclick="toggleTable()">Gestione</span>
     </div>
@@ -374,22 +366,25 @@
   </div>
 
   <script>
-    // --- Gestione Rotazione Foto (Transizione Dolce ogni 6 secondi) ---
+    // Rotazione foto
     const slides = document.querySelectorAll('.slide');
     let currentSlide = 0;
-    const slideInterval = 6000;
-
-    function nextSlide() {
-      slides[currentSlide].classList.remove('active');
-      currentSlide = (currentSlide + 1) % slides.length;
-      slides[currentSlide].classList.add('active');
-    }
-
     if (slides.length > 1) {
-      setInterval(nextSlide, slideInterval);
+      setInterval(() => {
+        slides[currentSlide].classList.remove('active');
+        currentSlide = (currentSlide + 1) % slides.length;
+        slides[currentSlide].classList.add('active');
+      }, 6000);
     }
 
-    // --- Gestione Invio Ordine ---
+    // Mostra/Nascondi quantità maglietta
+    function toggleQuantita() {
+      const taglia = document.getElementById('taglia').value;
+      const qContainer = document.getElementById('quantitaContainer');
+      qContainer.style.display = (taglia === 'Nessuna') ? 'none' : 'block';
+    }
+
+    // Invio Dati
     const scriptURL = 'https://script.google.com/macros/s/AKfycby2hyW6nqdssrr3LibPG2J8f5c34G_66fQrBGzK6W2bnF0FUndPmv9IpoblB17Mh4L5sw/exec';
     let isAuthenticated = false;
 
@@ -402,7 +397,8 @@
       const nomeVal = document.getElementById('nome').value;
       const emailVal = document.getElementById('email').value;
       const tagliaVal = document.getElementById('taglia').value;
-      const quantitaVal = document.getElementById('quantita').value;
+      const quantitaVal = (tagliaVal === 'Nessuna') ? 0 : document.getElementById('quantita').value;
+      const pranzoVal = document.getElementById('pranzo').value;
 
       btn.disabled = true;
       btn.innerText = "Invio in corso...";
@@ -412,7 +408,8 @@
         nome: nomeVal,
         email: emailVal,
         taglia: tagliaVal,
-        quantita: quantitaVal
+        quantita: quantitaVal,
+        pranzo: pranzoVal
       };
 
       fetch(scriptURL, {
@@ -423,25 +420,25 @@
       })
       .then(() => {
         document.getElementById('resNome').innerText = nomeVal;
-        document.getElementById('resEmail').innerText = emailVal;
-        document.getElementById('resTaglia').innerText = tagliaVal;
-        document.getElementById('resQuantita').innerText = quantitaVal;
+        document.getElementById('resMaglia').innerText = (tagliaVal === 'Nessuna') ? 'No' : `${tagliaVal} (x${quantitaVal})`;
+        document.getElementById('resPranzo').innerText = pranzoVal;
 
         document.getElementById('orderForm').style.display = 'none';
         document.getElementById('introText').style.display = 'none';
         document.getElementById('successBox').style.display = 'block';
       })
-      .catch(error => {
+      .catch(() => {
         errorBox.style.display = "block";
       })
       .finally(() => {
         btn.disabled = false;
-        btn.innerText = "Conferma Preordine";
+        btn.innerText = "Invia Conferma";
       });
     }
 
     function resetForm() {
       document.getElementById('orderForm').reset();
+      toggleQuantita();
       document.getElementById('orderForm').style.display = 'block';
       document.getElementById('introText').style.display = 'block';
       document.getElementById('successBox').style.display = 'none';
@@ -449,14 +446,12 @@
 
     function toggleTable() {
       const container = document.getElementById('tableContainer');
-      
       if (container.style.display === 'block') {
         container.style.display = 'none';
         return;
       }
-
       if (!isAuthenticated) {
-        const password = prompt("Inserisci la password dell'organizzazione per vedere il riepilogo:");
+        const password = prompt("Inserisci la password dell'organizzazione:");
         if (password === 'ronco') {
           isAuthenticated = true;
           container.style.display = 'block';
