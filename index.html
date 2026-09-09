@@ -298,9 +298,9 @@
       </div>
 
       <ul class="info-list">
-        <li><strong>Ritiro e Pagamento:</strong> Se hai ordinato la maglietta, la salderai al banco dell'evento (20€).</li>
-        <li><strong>Comunicazioni:</strong> Utilizzeremo la tua email per eventuali aggiornamenti sull'evento.</li>
+        <li id="infoRitiro"><strong>Ritiro e Pagamento:</strong> Il ritiro e il versamento della quota (20€ a maglietta) avverranno direttamente al banco dell'evento.</li>
         <li><strong>Beneficenza:</strong> Troverai anche il banco dedicato a chi desidera sostenere le nostre iniziative di solidarietà con un'offerta libera.</li>
+        <li><strong>Comunicazioni:</strong> Utilizzeremo la tua email per aggiornarti tempestivamente su orari e indicazioni meteo.</li>
       </ul>
 
       <p style="font-weight: bold; color: #065f46; margin: 12px 0 16px;">Ci vediamo sul campo! 👕🍖</p>
@@ -414,6 +414,14 @@
         document.getElementById('resNome').innerText = nomeVal;
         document.getElementById('resMaglia').innerText = (tagliaVal === 'Nessuna') ? 'No' : `${tagliaVal} (x${quantitaVal})`;
         document.getElementById('resPranzo').innerText = pranzoVal;
+
+        // Gestione dinamica della riga Ritiro e Pagamento
+        const infoRitiro = document.getElementById('infoRitiro');
+        if (tagliaVal === 'Nessuna') {
+          infoRitiro.style.display = 'none';
+        } else {
+          infoRitiro.style.display = 'list-item';
+        }
 
         document.getElementById('orderForm').style.display = 'none';
         document.getElementById('introText').style.display = 'none';
