@@ -93,10 +93,18 @@
       margin-bottom: 5px;
     }
 
+    /* Main Card con filigrana del logo integrata */
     .main-card {
       max-width: 480px;
       margin: -25px auto 30px;
-      background: #ffffff;
+      background-color: #ffffff;
+      
+      /* Filigrana del logo con sfumatura bianca al 92% per effetto trasparenza */
+      background-image: linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)), url('logo-watermark.png');
+      background-repeat: no-repeat;
+      background-position: center 70%;
+      background-size: 70% auto;
+
       border-radius: 18px;
       padding: 24px;
       box-shadow: 0 12px 30px rgba(148, 163, 184, 0.25);
