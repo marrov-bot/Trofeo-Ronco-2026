@@ -37,6 +37,23 @@
   .row b { color: #0284c7; margin-right: 8px; }
   .row .st { font-size: 13px; color: #64748b; font-variant-numeric: tabular-nums; }
   .numfind { width: 100%; font-size: 22px; padding: 10px; border: 2px solid #cbd5e1; border-radius: 10px; margin-bottom: 8px; text-align: center; }
+  .modo { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; background: #e2e8f0; padding: 4px; border-radius: 12px; }
+  .modo button { padding: 10px 0; border: none; border-radius: 9px; background: transparent; font-size: 15px; font-weight: 800; color: #475569; }
+  .modo button.on { background: #0f172a; color: #fff; }
+  .arr { display: grid; grid-template-columns: 34px 1fr auto auto auto; gap: 6px; align-items: center; padding: 9px 4px; border-bottom: 1px solid #f1f5f9; }
+  .arr .p { font-size: 20px; font-weight: 900; color: #0284c7; text-align: center; }
+  .arr .n { font-size: 16px; font-weight: 700; }
+  .arr .n small { display: block; font-size: 11px; color: #64748b; font-weight: 500; }
+  .arr button { border: 1px solid #cbd5e1; background: #fff; border-radius: 8px; padding: 7px 8px; font-size: 13px; }
+  .arr button.err { background: #fef3c7; border-color: #f59e0b; color: #92400e; font-weight: 800; }
+  .arr.rit { opacity: .55; }
+  .pairs { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .pairbtn { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+  .pairbtn .go { padding: 16px 10px; border: 2px solid #0284c7; background: #f0f9ff; color: #0c4a6e; border-radius: 12px; font-size: 18px; font-weight: 800; text-align: left; }
+  .pairbtn .go small { display: block; font-size: 11px; font-weight: 600; color: #0369a1; }
+  .pairbtn .rt { padding: 0 12px; border: 1.5px solid #fecaca; background: #fff; color: #b91c1c; border-radius: 12px; font-size: 12px; font-weight: 700; }
+  .stato { text-align: center; font-size: 13px; font-weight: 700; padding: 8px; border-radius: 10px; margin: 10px 0; }
+  .stato.ok { background: #dcfce7; color: #166534; } .stato.todo { background: #fef3c7; color: #92400e; }
 </style>
 </head>
 <body>
@@ -46,12 +63,16 @@
 </header>
 
 <div class="wrap">
+  <div class="modo"><button id="m-enduro" onclick="setModo('enduro')">⏱️ Enduro</button><button id="m-cross" onclick="setModo('cross')">🏍️ Cross</button></div>
+  <div id="vEnduro">
   <div class="tabs" id="tabs"></div>
   <div class="card" id="entry"></div>
 
   <h2 class="sec" id="tblTitle">Giro</h2>
   <table id="tbl"></table>
   <p class="note">Tocca un tempo per correggerlo. In arancione: tempo salvato sul telefono ma non ancora arrivato al foglio (parte da solo appena c'è rete).</p>
+  </div>
+  <div id="vCross" style="display:none"></div>
   <p class="note" style="text-align:center;margin-top:24px"><a href="#" onclick="esci();return false" style="color:#94a3b8">Esci (cancella il PIN da questo telefono)</a></p>
 </div>
 
@@ -89,7 +110,7 @@ function prossimo(daNum){
 }
 
 // ---------- disegno
-function disegna(){
+function disegnaEnduro(){
   const s = stato(), lista = presenti();
   document.getElementById('tabs').innerHTML = [1,2,3].map(g => {
     const c = lista.filter(p => tempo(s,p.num,g) != null).length, att = lista.filter(p => !R.fuori(s,p.num,g)).length;
@@ -138,6 +159,93 @@ function disegna(){
       <td>${p.num}</td><td class="l">${R.esc(p.nome)}</td>
       ${[1,2,3].map(g => { const v = tempo(s,p.num,g); return v != null ? `<td class="t" onclick="startCorreggi(${p.num},${g})">${R.fmt(v)}</td>` : '<td style="color:#cbd5e1">–</td>'; }).join('')}
     </tr>`).join('');
+}
+
+// ---------- modo Enduro / Cross
+let modo = (() => { try { return localStorage.getItem('ronco26_modo') || 'enduro'; } catch(e){ return 'enduro'; } })();
+function setModo(m){ modo = m; try { localStorage.setItem('ronco26_modo', m); } catch(e){} disegna(); scrollTo({top:0}); }
+function disegna(){
+  document.getElementById('m-enduro').classList.toggle('on', modo === 'enduro');
+  document.getElementById('m-cross').classList.toggle('on', modo === 'cross');
+  document.getElementById('vEnduro').style.display = modo === 'enduro' ? '' : 'none';
+  document.getElementById('vCross').style.display = modo === 'cross' ? '' : 'none';
+  if (modo === 'cross') disegnaCross(); else disegnaEnduro();
+}
+
+// ---------- CROSS: ordine di arrivo delle manche
+// bozza[gara] = [{c: N° coppia, err: errore cambio, rit: ritirata}] finché non si conferma
+const BKEY = 'ronco26_bozza_arrivi';
+let gara = 'M1', bozza = (() => { try { return JSON.parse(localStorage.getItem(BKEY)) || {}; } catch(e){ return {}; } })();
+const salvaBozza = () => { try { localStorage.setItem(BKEY, JSON.stringify(bozza)); } catch(e){} };
+const sopr = n => { const p = server.piloti.find(x => x.num === n); return p ? (p.sopr || p.nome) : n; };
+const nomeC = c => c ? sopr(c.a) + (c.b ? ' – ' + sopr(c.b) : ' 🏃 Marathon') : '?';
+const coppia = n => (server.coppie || []).find(c => c.n === n);
+function coppieGara(g){
+  if (g === 'F') return (server.qualificati || []).map(coppia).filter(Boolean);
+  const m = g === 'M1' ? 1 : 2;
+  return (server.coppie || []).filter(c => c.manche === m);
+}
+const lista = g => bozza[g] || ((server.arrivi || {})[g] || []).map(a => ({c: a.c, err: a.err, rit: a.rit}));
+const uguale = (a, b) => JSON.stringify(a.map(x => [x.c, !!x.err, !!x.rit])) === JSON.stringify(b.map(x => [x.c, !!x.err, !!x.rit]));
+
+function disegnaCross(){
+  const el = document.getElementById('vCross');
+  if (!(server.coppie || []).length) {
+    el.innerHTML = `<div class="card done"><div class="big">⏳</div><b>Coppie non ancora confermate</b><p class="note">Le coppie compaiono qui quando Marco le conferma dalla regia.</p></div>`;
+    return;
+  }
+  const nomeG = {M1: 'Manche 1', M2: 'Manche 2', F: 'Finale'};
+  const tabs = ['M1','M2','F'].map(g => {
+    const tot = coppieGara(g).length, fatti = lista(g).length;
+    return `<button class="${g===gara?'on':''}" onclick="gara='${g}';disegna()">${nomeG[g]}<small>${tot ? fatti + '/' + tot : '–'}</small></button>`;
+  }).join('');
+  const l = lista(gara), dentro = new Set(l.map(x => x.c));
+  const restanti = coppieGara(gara).filter(c => !dentro.has(c.n));
+  const salvato = uguale(l, ((server.arrivi || {})[gara] || []));
+  let pos = 0;
+  const righe = l.map((x, i) => {
+    const c = coppia(x.c);
+    const p = x.rit ? '–' : ++pos;
+    return `<div class="arr ${x.rit ? 'rit' : ''}"><span class="p">${p}</span>
+      <span class="n">${R.esc(nomeC(c))}<small>Coppia ${x.c}${x.rit ? ' · ritirata' : ''}</small></span>
+      ${x.rit ? '<span></span>' : `<button class="${x.err ? 'err' : ''}" onclick="errore(${i})">${x.err ? '⚠️ Errore cambio' : 'Cambio ok'}</button>`}
+      <button onclick="su(${i})" ${i ? '' : 'disabled'}>▲</button><button onclick="togli(${i})">✕</button></div>`;
+  }).join('');
+  el.innerHTML = `
+    <div class="tabs">${tabs}</div>
+    ${gara === 'F' && coppieGara('F').length < 4 ? `<p class="note">La finale si riempie quando sono confermate le due manche (prime 2 coppie di ciascuna).</p>` : ''}
+    <div class="card" style="padding:8px 10px">
+      <h2 class="sec" style="margin:6px 0">Ordine di arrivo · ${nomeG[gara]}</h2>
+      ${righe || '<p class="note">Nessuna coppia ancora. Tocca le coppie qui sotto quando tagliano il traguardo.</p>'}
+      <div class="stato ${salvato && l.length ? 'ok' : 'todo'}">${salvato && l.length ? '✓ Salvato sul foglio' : (l.length ? 'Da confermare' : '')}</div>
+      <div class="actions" style="grid-template-columns:1fr 2fr">
+        <button class="btn ghost" onclick="ricomincia()">↺ Annulla</button>
+        <button class="btn green" ${l.length && !salvato ? '' : 'disabled'} onclick="confermaArrivi()">✔ Conferma arrivi</button>
+      </div>
+    </div>
+    <h2 class="sec">${restanti.length ? 'Tocca la coppia quando arriva' : 'Tutte le coppie sono in lista'}</h2>
+    <div class="pairs">${restanti.map(c => `<div class="pairbtn">
+      <button class="go" onclick="arriva(${c.n})">${R.esc(nomeC(c))}<small>Coppia ${c.n}</small></button>
+      <button class="rt" onclick="ritira(${c.n})">Ritirata</button></div>`).join('')}</div>
+    <p class="note">Controllate i 2 giri a testa e il cambio di maschera e visiera. Se il cambio è sbagliato toccate «Cambio ok» e diventa «⚠️ Errore cambio»: decide Marco dalla regia.</p>`;
+}
+function modifica(fn){ const l = lista(gara).map(x => ({...x})); fn(l); l.sort((a, b) => (a.rit ? 1 : 0) - (b.rit ? 1 : 0)); bozza[gara] = l; salvaBozza(); disegna(); }
+function arriva(n){ modifica(l => l.push({c: n, err: false, rit: false})); }
+function ritira(n){ modifica(l => l.push({c: n, err: false, rit: true})); }
+function errore(i){ modifica(l => l[i].err = !l[i].err); }
+function su(i){ modifica(l => { if (i > 0) [l[i-1], l[i]] = [l[i], l[i-1]]; }); }
+function togli(i){ modifica(l => l.splice(i, 1)); }
+function ricomincia(){ if (bozza[gara] && !confirm('Annullare le modifiche non confermate?')) return; delete bozza[gara]; salvaBozza(); disegna(); }
+async function confermaArrivi(){
+  const l = lista(gara);
+  const tot = coppieGara(gara).length;
+  if (l.length < tot && !confirm(`Mancano ${tot - l.length} coppie. Confermare lo stesso?`)) return;
+  try {
+    const r = await R.scrivi({a: 'arrivi', pin, gara, lista: l});
+    if (!r.ok) return alert('Errore: ' + r.errore);
+    server = r; delete bozza[gara]; salvaBozza();
+    R.toast('✔ Arrivi salvati'); disegna();
+  } catch(e){ alert('Nessuna connessione: gli arrivi restano qui, riprova tra poco.'); }
 }
 
 // ---------- azioni

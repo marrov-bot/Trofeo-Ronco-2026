@@ -7,8 +7,8 @@
 <title>Ronco 2026 · Regia</title>
 <link rel="stylesheet" href="ronco.css">
 <style>
-  .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; position: sticky; top: 46px; z-index: 4; background: #f0f4f8; padding: 6px 0; }
-  .tabs button { padding: 11px 0; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #fff; font-size: 14px; font-weight: 700; color: #334155; }
+  .tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 12px; position: sticky; top: 46px; z-index: 4; background: #f0f4f8; padding: 6px 0; }
+  .tabs button { padding: 9px 0; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #fff; font-size: 12px; font-weight: 700; color: #334155; }
   .tabs button.on { background: #0f172a; border-color: #0f172a; color: #fff; }
   .kpi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
   .kpi div { background: #fff; border-radius: 12px; padding: 10px; text-align: center; border: 1px solid #e2e8f0; }
@@ -25,7 +25,8 @@
   .add { display: grid; grid-template-columns: 70px 1fr 1fr; gap: 6px; margin-top: 10px; }
   .add input, select { padding: 10px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; width: 100%; background: #fff; }
   .lotto td { border-top: 2px solid #e2e8f0; }
-  .cp { display: grid; grid-template-columns: 26px 1fr 1fr; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .cp .k small { display: block; font-size: 10px; color: #64748b; }
+  .cp { display: grid; grid-template-columns: 30px 1fr 1fr; gap: 6px; align-items: center; margin-bottom: 6px; }
   .cp .k { font-weight: 800; color: #0284c7; text-align: center; }
   textarea { width: 100%; height: 220px; font-family: ui-monospace, Menlo, monospace; font-size: 13px; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 10px; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
@@ -44,6 +45,8 @@
     <button id="t-piloti" onclick="tab('piloti')">👤 Piloti</button>
     <button id="t-gara" onclick="tab('gara')">⏱️ Gara</button>
     <button id="t-coppie" onclick="tab('coppie')">🤝 Coppie</button>
+    <button id="t-cross" onclick="tab('cross')">🏍️ Cross</button>
+    <button id="t-pubblica" onclick="tab('pubblica')">📣 Pubblica</button>
   </div>
   <div id="view"></div>
   <p class="note" style="text-align:center;margin-top:24px">
@@ -64,10 +67,10 @@ function tab(v){ vista = v; disegna(); }
 const nome = p => p ? (p.sopr || p.nome) : '';
 
 function disegna(){
-  ['piloti','gara','coppie'].forEach(v => document.getElementById('t-'+v).classList.toggle('on', v === vista));
+  ['piloti','gara','coppie','cross','pubblica'].forEach(v => document.getElementById('t-'+v).classList.toggle('on', v === vista));
   const g = R.giroInCorso(stato);
   document.getElementById('st').innerHTML = (g > 3 ? '🏁 crono finito' : `giro ${g} in corso`) + '<br>' + new Date(stato.ora).toLocaleTimeString('it-IT');
-  ({piloti: vPiloti, gara: vGara, coppie: vCoppie})[vista]();
+  ({piloti: vPiloti, gara: vGara, coppie: vCoppie, cross: vCross, pubblica: vPubblica})[vista]();
 }
 
 // ---------- PILOTI: presenze, ordine di partenza, aggiunte
@@ -119,11 +122,19 @@ function vGara(){
     <div class="kpi"><div><b>${fatti}/${pres.length*3}</b><span>tempi</span></div><div><b>${R.giroInCorso(stato) > 3 ? '🏁' : R.giroInCorso(stato)}</b><span>giro</span></div><div><b>${cl.filter(r=>r.rit).length}</b><span>ritirati</span></div></div>
     <table><tr><th>Pos</th><th>N°</th><th style="text-align:left">Pilota</th><th>G1</th><th>G2</th><th>G3</th><th>Tot</th><th>Pt</th></tr>
     ${cl.map(r => `<tr><td><b>${r.pos||''}</b></td><td>${r.p.num}</td><td class="l">${R.esc(nome(r.p))}</td>${r.t.map(v => `<td>${v!=null?R.fmt(v):'–'}</td>`).join('')}<td><b>${r.rit?'Rit.':(r.giri?R.fmt(r.somma):'')}</b></td><td>${r.punti??''}</td></tr>`).join('')}</table>
-    <p class="note">Per correggere un tempo usa il crono con il tuo PIN di regia. Ogni modifica resta nel foglio «Registro».</p>`;
+    <p class="note">Per correggere un tempo usa il crono con il tuo PIN di regia. Ogni modifica resta nel foglio «Registro».</p>
+    <p class="note">Per svelare la classifica sul tabellone vai su <b>📣 Pubblica</b>.</p>`;
+}
+async function svela(cosa, v){
+  const nomi = {enduro: 'la classifica enduro', cross: 'la classifica cross', assoluta: "l'assoluta"};
+  if (v && !confirm(`Svelare ${nomi[cosa]} sul tabellone?`)) return;
+  try { const r = await R.scrivi({a: 'svela', pin, cosa, val: v}); if (!r.ok) return alert('Errore: ' + r.errore); stato = r; disegna(); R.toast(v ? 'Svelata' : 'Nascosta'); }
+  catch(e){ alert('Nessuna connessione: riprova'); }
 }
 
 // ---------- COPPIE: proposta automatica, correzioni, invio su WhatsApp
-function coppieFinali(){
+// coppie proposte (classifica enduro + correzioni) → [[pilota A, pilota B o null], …]
+function coppieProposte(){
   return R.coppie(stato).map((c, i) => {
     const k = corr[i+1];
     if (!k) return c;
@@ -131,32 +142,69 @@ function coppieFinali(){
     return [P(k[0]) || c[0], k[1] === 0 ? null : (P(k[1]) || c[1])];
   });
 }
+// le coppie confermate sul foglio hanno la precedenza sulla proposta
+const P = n => stato.piloti.find(p => p.num === n) || null;
+function coppieConfermate(){ return (stato.coppie || []).map(c => ({c: [P(c.a), c.b ? P(c.b) : null], m: c.manche, n: c.n})); }
+function coppieFinali(){ return coppieProposte(); }
 function testoWA(){
-  const cp = coppieFinali();
+  const conf = coppieConfermate();
+  const cp = conf.length ? conf.map(x => x.c) : coppieProposte();
+  const mancheDi = i => conf.length ? conf[i].m : manche(i, cp);
   let t = '🏍️ *TROFEO RONCO 2026 · Coppie cross*\n\n';
-  cp.forEach((c, i) => { t += c[1] ? `${i+1}. ${nome(c[0])} – ${nome(c[1])}\n` : `${i+1}. ${nome(c[0])} (Marathon, 4 giri da solo)\n`; });
+  // Manche: coppie 1,3,5… → manche 1; coppie 2,4,6… → manche 2 (equilibrio).
+  // Dentro ogni manche ordine alfabetico: la lista non rivela chi è primo o ultimo nell'enduro.
+  const alfa = (a, b) => nome(a).localeCompare(nome(b), 'it');
+  [1, 2].forEach(m => {
+    const qui = cp.map((c, i) => ({c, m: mancheDi(i)})).filter(x => x.m === m).map(x => x.c);
+    t += `*Manche ${m}*\n`;
+    qui.filter(c => c[1]).map(c => [c[0], c[1]].sort(alfa)).sort((x, y) => alfa(x[0], y[0]))
+       .forEach(c => { t += `• ${nome(c[0])} – ${nome(c[1])}\n`; });
+    qui.filter(c => !c[1]).forEach(c => { t += `• ${nome(c[0])} 🏃 Marathon (4 giri da solo)\n`; });
+    t += '\n';
+  });
   if (document.getElementById('conCl')?.checked) {
     t += '\n⏱️ *Classifica enduro*\n';
     R.classifica(stato).forEach(r => { t += r.pos ? `${r.pos}. ${nome(r.p)} ${R.fmt(r.somma)}\n` : `– ${nome(r.p)} ${r.rit?'rit.':''}\n`; });
   }
-  return t + '\nForza Ronco! 💪';
+  return t.trimEnd() + '\n\nForza Ronco! 💪';
+}
+// manche della coppia i (0 = prima coppia): alternate 1,2,1,2…
+// il Marathon va nella manche con meno coppie
+function manche(i, cp){
+  if (cp[i][1]) return i % 2 === 0 ? 1 : 2;
+  const n1 = cp.filter((c, j) => c[1] && j % 2 === 0).length, n2 = cp.filter((c, j) => c[1] && j % 2 === 1).length;
+  return n1 <= n2 ? 1 : 2;
 }
 function vCoppie(){
   const finito = R.giroInCorso(stato) > 3;
   const cp = coppieFinali(), pres = stato.piloti.filter(p => p.presente).sort((a,b) => a.ordine - b.ordine);
   const opt = (sel, conNessuno) => (conNessuno ? `<option value="0" ${sel==null?'selected':''}>— Marathon (da solo)</option>` : '') +
     pres.map(p => `<option value="${p.num}" ${sel && sel.num===p.num?'selected':''}>${p.num} ${R.esc(nome(p))}</option>`).join('');
+  const conf = coppieConfermate();
+  const uguali = conf.length === cp.length && conf.every((x, i) => x.c[0]?.num === cp[i][0]?.num && (x.c[1]?.num || 0) === (cp[i][1]?.num || 0));
+  const arrivi = Object.values(stato.arrivi || {}).some(l => l.length);
   document.getElementById('view').innerHTML = `
     ${finito ? '' : '<div class="dirty" style="display:block">Crono non ancora finito: coppie provvisorie</div>'}
-    <p class="note">Proposta automatica dalla classifica enduro: 1° con ultimo, 2° con penultimo… Con piloti dispari, il centrale corre la Marathon. Cambia una coppia dai menu: la correzione resta su questo telefono.</p>
-    ${cp.map((c,i) => `<div class="cp"><span class="k">${i+1}</span>
+    <div class="dirty" style="display:block;${conf.length && uguali ? 'background:#dcfce7;border-color:#86efac;color:#166534' : ''}">
+      ${conf.length ? (uguali ? '✅ Coppie confermate: le ragazze le vedono nel crono' : '⚠️ Le coppie qui sotto sono diverse da quelle confermate') : 'Coppie non ancora confermate'}</div>
+    <p class="note">Proposta automatica dalla classifica enduro: 1° con ultimo, 2° con penultimo… Con piloti dispari, il centrale corre la Marathon. Manche alternate: coppie 1, 3, 5… in M1; 2, 4, 6… in M2. Cambia una coppia dai menu: la correzione resta su questo telefono.</p>
+    ${cp.map((c,i) => `<div class="cp"><span class="k">${i+1}<small>M${manche(i, cp)}</small></span>
       <select onchange="correggi(${i+1},0,this.value)">${opt(c[0])}</select>
       <select onchange="correggi(${i+1},1,this.value)">${opt(c[1], true)}</select></div>`).join('')}
-    <button class="btn ghost" style="width:100%;margin-top:6px" onclick="corr={};salvaCorr();disegna()">↺ Torna alla proposta automatica</button>
-    <label class="sw"><input type="checkbox" id="conCl" onchange="anteprima()"> Aggiungi la classifica enduro al messaggio</label>
+    <div class="row2"><button class="btn ghost" onclick="corr={};salvaCorr();disegna()">↺ Proposta automatica</button>
+      <button class="btn" ${uguali && conf.length ? 'disabled' : ''} onclick="confermaCoppie(${arrivi})">✅ Conferma coppie</button></div>
+    <p class="note">Nel messaggio le coppie sono divise per manche e, dentro la manche, in <b>ordine alfabetico</b>: non si capisce chi ha vinto l'enduro.</p>
+    <label class="sw"><input type="checkbox" id="conCl" onchange="anteprima()"> Aggiungi la classifica enduro (svela il vincitore!)</label>
     <textarea id="txt"></textarea>
     <div class="row2"><button class="btn ghost" onclick="copia()">📋 Copia</button><button class="btn wa" onclick="whatsapp()">WhatsApp</button></div>`;
   anteprima();
+}
+async function confermaCoppie(arrivi){
+  if (arrivi && !confirm('Ci sono già arrivi del cross registrati. Cambiare le coppie?')) return;
+  const cp = coppieProposte();
+  const lista = cp.map((c, i) => ({a: c[0].num, b: c[1] ? c[1].num : null, manche: manche(i, cp)}));
+  try { const r = await R.scrivi({a: 'coppie', pin, coppie: lista}); if (!r.ok) return alert('Errore: ' + r.errore); stato = r; R.toast('Coppie confermate'); disegna(); }
+  catch(e){ alert('Nessuna connessione: riprova'); }
 }
 function correggi(i, lato, v){
   const c = coppieFinali()[i-1];
@@ -168,6 +216,88 @@ function anteprima(){ document.getElementById('txt').value = testoWA(); }
 function copia(){ navigator.clipboard.writeText(document.getElementById('txt').value).then(() => R.toast('Copiato'), () => R.toast('Seleziona e copia a mano')); }
 function whatsapp(){
   const t = document.getElementById('txt').value;
+  if (navigator.share) navigator.share({text: t}).catch(() => {});
+  else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank');
+}
+
+// ---------- CROSS: arrivi, squalifiche, penalità, classifica
+const nomeC = n => { const c = (stato.coppie || []).find(x => x.n === n); return c ? nome(P(c.a)) + (c.b ? ' – ' + nome(P(c.b)) : ' (Marathon)') : '?'; };
+const NOMEG = {M1: 'Manche 1', M2: 'Manche 2', F: 'Finale'};
+function vCross(){
+  if (!(stato.coppie || []).length) { document.getElementById('view').innerHTML = '<div class="dirty" style="display:block">Prima conferma le coppie (scheda 🤝 Coppie).</div>'; return; }
+  const xc = {}; (stato.cross || []).forEach(c => xc[c.n] = c);
+  const gare = ['M1', 'M2', 'F'].map(g => {
+    const l = (stato.arrivi || {})[g] || [];
+    let pos = 0;
+    return `<h2 class="sec">${NOMEG[g]}</h2><div class="card" style="padding:6px 10px">${l.length ? l.map(a => {
+      const valida = !a.rit && a.sq !== 'SI', p = valida ? ++pos : '–', c = xc[a.c] || {};
+      const pt = g === 'F' ? (valida ? '+' + c.puntiF : 0) : (valida ? c.puntiM : 0);
+      return `<div style="display:grid;grid-template-columns:26px 1fr auto;gap:6px;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9">
+        <b style="color:#0284c7">${p}</b><span>${R.esc(nomeC(a.c))}${a.rit ? ' <small>(ritirata)</small>' : ''}${a.sq === 'SI' ? ' <small style="color:#b91c1c">squalificata</small>' : ''}
+        ${a.err ? `<br><small style="color:#92400e">⚠️ errore cambio segnalato</small> <button class="btn ghost" style="padding:4px 8px;font-size:12px" onclick="squalifica('${g}',${a.c},${a.sq !== 'SI'})">${a.sq === 'SI' ? 'Annulla squalifica' : 'Squalifica'}</button>${a.sq !== 'SI' && a.sq !== 'NO' ? ` <button class="btn ghost" style="padding:4px 8px;font-size:12px" onclick="squalifica('${g}',${a.c},false)">Ignora</button>` : ''}` : ''}</span>
+        <b>${pt} pt</b></div>`; }).join('') : '<p class="note">Nessun arrivo confermato.</p>'}</div>`;
+  }).join('');
+  const pres = stato.piloti.filter(p => p.presente).sort((a, b) => a.num - b.num);
+  const fuori = ((stato.arrivi || {}).F || []).filter(a => !(stato.qualificati || []).includes(a.c));
+  document.getElementById('view').innerHTML = `
+    ${fuori.length ? `<div class="dirty" style="display:block">⚠️ Nella finale c'è una coppia non più qualificata (${fuori.map(a => R.esc(nomeC(a.c))).join(', ')}): non prende punti. Fai ricontrollare la finale dal crono.</div>` : ''}
+    <p class="note">Gli arrivi li inseriscono le ragazze dal crono. Se segnano un errore nel cambio, decidi tu: <b>Squalifica</b> (0 punti, fuori dalla finale) o <b>Ignora</b>.</p>
+    ${gare}
+    <h2 class="sec">Classifica cross (coppie)</h2>
+    <table><tr><th>Pos</th><th style="text-align:left">Coppia</th><th>M</th><th>Manche</th><th>Finale</th><th>Tot</th></tr>
+    ${(stato.cross || []).map(c => `<tr><td><b>${c.pos}</b></td><td class="l">${R.esc(nomeC(c.n))}</td><td>M${c.manche}</td><td>${c.posM ? c.posM + '° · ' + c.puntiM : '–'}</td><td>${c.posF ? c.posF + '° · +' + c.puntiF : (c.finale ? 'in finale' : '–')}</td><td><b>${c.tot}</b></td></tr>`).join('')}</table>
+    <h2 class="sec">Penalità paletti / fettucce (3 punti)</h2>
+    <div class="card" style="padding:4px 10px">${pres.map(p => { const v = (stato.penalita || {})[p.num] || 0; return `
+      <div style="display:grid;grid-template-columns:40px 1fr 40px 50px 40px;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9">
+        <b style="color:#0284c7">${p.num}</b><span>${R.esc(nome(p))}</span>
+        <button class="btn ghost" style="padding:6px" onclick="penalita(${p.num},${v - 3})" ${v ? '' : 'disabled'}>−</button>
+        <b style="text-align:center;color:${v ? '#b91c1c' : '#94a3b8'}">${v ? '−' + v : '0'}</b>
+        <button class="btn ghost" style="padding:6px" onclick="penalita(${p.num},${v + 3})">+</button></div>`; }).join('')}</div>
+    <h2 class="sec">Assoluta</h2>
+    <table><tr><th>Pos</th><th style="text-align:left">Pilota</th><th>End.</th><th>Cross</th><th>Pen.</th><th>Tot</th></tr>
+    ${(stato.assoluta || []).map(r => `<tr><td><b>${r.pos}</b></td><td class="l">${R.esc(nome(P(r.num)))}</td><td>${r.enduro}</td><td>${r.cross}</td><td>${r.pen ? '−' + r.pen : ''}</td><td><b>${r.tot}</b></td></tr>`).join('')}</table>`;
+}
+async function squalifica(gara, c, val){
+  try { const r = await R.scrivi({a: 'squalifica', pin, gara, c, val}); if (!r.ok) return alert('Errore: ' + r.errore); stato = r; disegna(); }
+  catch(e){ alert('Nessuna connessione: riprova'); }
+}
+async function penalita(num, punti){
+  try { const r = await R.scrivi({a: 'penalita', pin, num, punti: Math.max(0, punti)}); if (!r.ok) return alert('Errore: ' + r.errore); stato = r; disegna(); }
+  catch(e){ alert('Nessuna connessione: riprova'); }
+}
+
+// ---------- PUBBLICA: svela sul tabellone e messaggi WhatsApp
+function testi(){
+  const end = R.classifica(stato).filter(r => r.pos && r.giri === 3);
+  const t = {};
+  t.enduro = '⏱️ *TROFEO RONCO 2026 · Classifica enduro*\n\n' + end.map(r => `${r.pos}. ${nome(r.p)} · ${R.fmt(r.somma)} · ${r.punti} pt`).join('\n');
+  t.coppie = testoWA();
+  t.cross = '🏍️ *TROFEO RONCO 2026 · Classifica cross*\n\n' + (stato.cross || []).map(c => `${c.pos}. ${nomeC(c.n)} · ${c.tot} pt`).join('\n');
+  const fin = ((stato.arrivi || {}).F || []).filter(a => !a.rit && a.sq !== 'SI');
+  if (fin.length) t.cross += '\n\n🏁 *Finale*\n' + fin.map((a, i) => `${i + 1}. ${nomeC(a.c)}`).join('\n');
+  t.assoluta = '🏆 *TROFEO RONCO 2026 · Classifica assoluta*\n\n' + (stato.assoluta || []).map(r => `${r.pos}. ${nome(P(r.num))} · ${r.tot} pt`).join('\n') + '\n\nGrazie a tutti, alla prossima! 💪';
+  return t;
+}
+function vPubblica(){
+  const t = testi(), sv = stato.svela || {};
+  const blocco = (k, titolo, nota, conSvela) => `
+    <h2 class="sec">${titolo}</h2>
+    <div class="card">
+      <p class="note" style="margin-top:0">${nota}</p>
+      ${conSvela ? (sv[k]
+        ? `<button class="btn ghost" style="width:100%" onclick="svela('${k}',false)">🔒 Nascondi dal tabellone</button><p class="note" style="color:#166534;font-weight:700">✓ Visibile sul tabellone</p>`
+        : `<button class="btn" style="width:100%;background:#ca8a04" onclick="svela('${k}',true)">🏆 Svela sul tabellone</button>`) : ''}
+      <div class="row2"><button class="btn ghost" onclick="copiaT('${k}')">📋 Copia</button><button class="btn wa" onclick="condividi('${k}')">WhatsApp</button></div>
+    </div>`;
+  document.getElementById('view').innerHTML =
+    blocco('enduro', '1 · Classifica enduro', 'Al giro 3 e a crono chiuso il tabellone nasconde totale e punti. Svela quando vuoi: lo speaker annuncia il vincitore.', true) +
+    blocco('coppie', '2 · Coppie per WhatsApp', 'Divise per manche, in ordine alfabetico: non svelano la classifica. Prima confermale nella scheda 🤝 Coppie.', false) +
+    blocco('cross', '3 · Classifica cross', 'Punti delle manche più punti extra della finale, per coppia.', true) +
+    blocco('assoluta', '4 · Assoluta', 'Punti enduro + punti cross della coppia − penalità. A parità vince il miglior tempo enduro.', true);
+}
+function copiaT(k){ navigator.clipboard.writeText(testi()[k]).then(() => R.toast('Copiato'), () => R.toast('Copia non riuscita')); }
+function condividi(k){
+  const t = testi()[k];
   if (navigator.share) navigator.share({text: t}).catch(() => {});
   else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank');
 }
