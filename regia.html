@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Ronco 2026 · Regia</title>
+<link rel="stylesheet" href="ronco.css">
+<style>
+  .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; position: sticky; top: 46px; z-index: 4; background: #f0f4f8; padding: 6px 0; }
+  .tabs button { padding: 11px 0; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #fff; font-size: 14px; font-weight: 700; color: #334155; }
+  .tabs button.on { background: #0f172a; border-color: #0f172a; color: #fff; }
+  .kpi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .kpi div { background: #fff; border-radius: 12px; padding: 10px; text-align: center; border: 1px solid #e2e8f0; }
+  .kpi b { display: block; font-size: 22px; color: #0284c7; }
+  .kpi span { font-size: 11px; color: #64748b; text-transform: uppercase; }
+  .pl { display: grid; grid-template-columns: 30px 44px 1fr 34px 34px 52px; gap: 6px; align-items: center; padding: 8px 4px; border-bottom: 1px solid #f1f5f9; background: #fff; }
+  .pl.no { opacity: .45; }
+  .pl .o { color: #94a3b8; font-size: 12px; text-align: center; }
+  .pl .n { font-weight: 800; color: #0284c7; }
+  .pl small { display: block; color: #64748b; font-size: 11px; }
+  .pl button { border: 1px solid #cbd5e1; background: #fff; border-radius: 8px; padding: 6px 0; font-size: 14px; }
+  .pl .pr { font-size: 11px; font-weight: 700; }
+  .pl .pr.si { background: #dcfce7; border-color: #86efac; color: #166534; }
+  .add { display: grid; grid-template-columns: 70px 1fr 1fr; gap: 6px; margin-top: 10px; }
+  .add input, select { padding: 10px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; width: 100%; background: #fff; }
+  .lotto td { border-top: 2px solid #e2e8f0; }
+  .cp { display: grid; grid-template-columns: 26px 1fr 1fr; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .cp .k { font-weight: 800; color: #0284c7; text-align: center; }
+  textarea { width: 100%; height: 220px; font-family: ui-monospace, Menlo, monospace; font-size: 13px; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 10px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .wa { background: #25d366; }
+  .sw { display: flex; align-items: center; gap: 8px; font-size: 14px; margin: 10px 0; }
+  .dirty { background: #fef3c7; border: 1px solid #fcd34d; color: #92400e; padding: 8px 12px; border-radius: 10px; font-size: 13px; margin-bottom: 10px; display: none; }
+</style>
+</head>
+<body>
+<header class="bar">
+  <h1>Ronco 2026 · Regia</h1>
+  <span class="st" id="st">…</span>
+</header>
+<div class="wrap">
+  <div class="tabs">
+    <button id="t-piloti" onclick="tab('piloti')">👤 Piloti</button>
+    <button id="t-gara" onclick="tab('gara')">⏱️ Gara</button>
+    <button id="t-coppie" onclick="tab('coppie')">🤝 Coppie</button>
+  </div>
+  <div id="view"></div>
+  <p class="note" style="text-align:center;margin-top:24px">
+    <a href="crono.html" style="color:#0284c7">Apri il crono</a> ·
+    <a href="tabellone.html" style="color:#0284c7">Apri il tabellone</a> ·
+    <a href="#" onclick="esci();return false" style="color:#94a3b8">Esci</a>
+  </p>
+</div>
+
+<script src="ronco.js"></script>
+<script>
+let pin = R.getPin('regia'), stato = null, vista = 'piloti';
+let bozza = null;                     // modifiche piloti non ancora salvate
+const CKEY = 'ronco26_coppie_corrette';
+let corr = (() => { try { return JSON.parse(localStorage.getItem(CKEY)) || {}; } catch(e){ return {}; } })();
+
+function tab(v){ vista = v; disegna(); }
+const nome = p => p ? (p.sopr || p.nome) : '';
+
+function disegna(){
+  ['piloti','gara','coppie'].forEach(v => document.getElementById('t-'+v).classList.toggle('on', v === vista));
+  const g = R.giroInCorso(stato);
+  document.getElementById('st').innerHTML = (g > 3 ? '🏁 crono finito' : `giro ${g} in corso`) + '<br>' + new Date(stato.ora).toLocaleTimeString('it-IT');
+  ({piloti: vPiloti, gara: vGara, coppie: vCoppie})[vista]();
+}
+
+// ---------- PILOTI: presenze, ordine di partenza, aggiunte
+function vPiloti(){
+  const lista = bozza || stato.piloti.slice().sort((a,b) => a.ordine - b.ordine);
+  const pres = lista.filter(p => p.presente);
+  let k = 0;
+  document.getElementById('view').innerHTML = `
+    <div class="dirty" id="dirty" style="display:${bozza?'block':'none'}">Modifiche non salvate</div>
+    <div class="kpi"><div><b>${pres.length}</b><span>presenti</span></div><div><b>${lista.length - pres.length}</b><span>assenti</span></div><div><b>${Math.ceil(pres.length/3)}</b><span>terzetti</span></div></div>
+    <p class="note">Ordine di partenza dall'alto. ▲▼ per spostare, tocca SI/NO per la presenza. Il N° di gara non cambia mai (è sulla moto).</p>
+    <div class="card" style="padding:4px">${lista.map((p,i) => {
+      const o = p.presente ? ++k : '';
+      return `<div class="pl ${p.presente?'':'no'}" ${p.presente && (k-1)%3===0 && k>1 ? 'style="border-top:2px solid #cbd5e1"' : ''}>
+        <span class="o">${o}</span><span class="n">${p.num}</span>
+        <span>${R.esc(p.nome)}<small>${R.esc(p.sopr||'')}</small></span>
+        <button onclick="muovi(${i},-1)">▲</button><button onclick="muovi(${i},1)">▼</button>
+        <button class="pr ${p.presente?'si':''}" onclick="presenza(${i})">${p.presente?'SI':'NO'}</button></div>`;
+    }).join('')}</div>
+    <h2 class="sec">Aggiungi pilota</h2>
+    <div class="add"><input id="an" inputmode="numeric" placeholder="N°"><input id="anm" placeholder="Nome e cognome"><input id="as" placeholder="Soprannome"></div>
+    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="aggiungi()">+ Aggiungi in fondo</button>
+    <div class="row2"><button class="btn ghost" onclick="bozza=null;disegna()">Annulla modifiche</button><button class="btn" onclick="salvaPiloti()">💾 Salva sul foglio</button></div>`;
+}
+function copiaBozza(){ if (!bozza) bozza = stato.piloti.slice().sort((a,b) => a.ordine - b.ordine).map(p => ({...p})); }
+function muovi(i, d){ copiaBozza(); const j = i + d; if (j < 0 || j >= bozza.length) return; [bozza[i], bozza[j]] = [bozza[j], bozza[i]]; disegna(); }
+function presenza(i){ copiaBozza(); bozza[i].presente = !bozza[i].presente; disegna(); }
+function aggiungi(){
+  const num = +document.getElementById('an').value, nm = document.getElementById('anm').value.trim(), so = document.getElementById('as').value.trim();
+  if (!num || !nm) return alert('Servono numero e nome');
+  copiaBozza();
+  if (bozza.some(p => p.num === num)) return alert('Numero già usato');
+  bozza.push({num, nome: nm, sopr: so, presente: true}); disegna();
+}
+async function salvaPiloti(){
+  if (!bozza) return R.toast('Niente da salvare');
+  try {
+    const r = await R.scrivi({a: 'piloti', pin, piloti: bozza});
+    if (!r.ok) return alert('Errore: ' + r.errore);
+    stato = r; bozza = null; R.toast('Piloti salvati'); disegna();
+  } catch(e){ alert('Nessuna connessione: riprova'); }
+}
+
+// ---------- GARA: classifica completa con tutti i giri
+function vGara(){
+  const cl = R.classifica(stato), pres = stato.piloti.filter(p => p.presente);
+  const fatti = pres.reduce((a,p) => a + (stato.tempi[p.num] || []).filter(v => v != null).length, 0);
+  document.getElementById('view').innerHTML = `
+    <div class="kpi"><div><b>${fatti}/${pres.length*3}</b><span>tempi</span></div><div><b>${R.giroInCorso(stato) > 3 ? '🏁' : R.giroInCorso(stato)}</b><span>giro</span></div><div><b>${cl.filter(r=>r.rit).length}</b><span>ritirati</span></div></div>
+    <table><tr><th>Pos</th><th>N°</th><th style="text-align:left">Pilota</th><th>G1</th><th>G2</th><th>G3</th><th>Tot</th><th>Pt</th></tr>
+    ${cl.map(r => `<tr><td><b>${r.pos||''}</b></td><td>${r.p.num}</td><td class="l">${R.esc(nome(r.p))}</td>${r.t.map(v => `<td>${v!=null?R.fmt(v):'–'}</td>`).join('')}<td><b>${r.rit?'Rit.':(r.giri?R.fmt(r.somma):'')}</b></td><td>${r.punti??''}</td></tr>`).join('')}</table>
+    <p class="note">Per correggere un tempo usa il crono con il tuo PIN di regia. Ogni modifica resta nel foglio «Registro».</p>`;
+}
+
+// ---------- COPPIE: proposta automatica, correzioni, invio su WhatsApp
+function coppieFinali(){
+  return R.coppie(stato).map((c, i) => {
+    const k = corr[i+1];
+    if (!k) return c;
+    const P = n => n ? stato.piloti.find(p => p.num === n) || null : null;
+    return [P(k[0]) || c[0], k[1] === 0 ? null : (P(k[1]) || c[1])];
+  });
+}
+function testoWA(){
+  const cp = coppieFinali();
+  let t = '🏍️ *TROFEO RONCO 2026 · Coppie cross*\n\n';
+  cp.forEach((c, i) => { t += c[1] ? `${i+1}. ${nome(c[0])} – ${nome(c[1])}\n` : `${i+1}. ${nome(c[0])} (Marathon, 4 giri da solo)\n`; });
+  if (document.getElementById('conCl')?.checked) {
+    t += '\n⏱️ *Classifica enduro*\n';
+    R.classifica(stato).forEach(r => { t += r.pos ? `${r.pos}. ${nome(r.p)} ${R.fmt(r.somma)}\n` : `– ${nome(r.p)} ${r.rit?'rit.':''}\n`; });
+  }
+  return t + '\nForza Ronco! 💪';
+}
+function vCoppie(){
+  const finito = R.giroInCorso(stato) > 3;
+  const cp = coppieFinali(), pres = stato.piloti.filter(p => p.presente).sort((a,b) => a.ordine - b.ordine);
+  const opt = (sel, conNessuno) => (conNessuno ? `<option value="0" ${sel==null?'selected':''}>— Marathon (da solo)</option>` : '') +
+    pres.map(p => `<option value="${p.num}" ${sel && sel.num===p.num?'selected':''}>${p.num} ${R.esc(nome(p))}</option>`).join('');
+  document.getElementById('view').innerHTML = `
+    ${finito ? '' : '<div class="dirty" style="display:block">Crono non ancora finito: coppie provvisorie</div>'}
+    <p class="note">Proposta automatica dalla classifica enduro: 1° con ultimo, 2° con penultimo… Con piloti dispari, il centrale corre la Marathon. Cambia una coppia dai menu: la correzione resta su questo telefono.</p>
+    ${cp.map((c,i) => `<div class="cp"><span class="k">${i+1}</span>
+      <select onchange="correggi(${i+1},0,this.value)">${opt(c[0])}</select>
+      <select onchange="correggi(${i+1},1,this.value)">${opt(c[1], true)}</select></div>`).join('')}
+    <button class="btn ghost" style="width:100%;margin-top:6px" onclick="corr={};salvaCorr();disegna()">↺ Torna alla proposta automatica</button>
+    <label class="sw"><input type="checkbox" id="conCl" onchange="anteprima()"> Aggiungi la classifica enduro al messaggio</label>
+    <textarea id="txt"></textarea>
+    <div class="row2"><button class="btn ghost" onclick="copia()">📋 Copia</button><button class="btn wa" onclick="whatsapp()">WhatsApp</button></div>`;
+  anteprima();
+}
+function correggi(i, lato, v){
+  const c = coppieFinali()[i-1];
+  corr[i] = corr[i] || [c[0].num, c[1] ? c[1].num : 0];
+  corr[i][lato] = +v; salvaCorr(); disegna();
+}
+function salvaCorr(){ try { localStorage.setItem(CKEY, JSON.stringify(corr)); } catch(e){} }
+function anteprima(){ document.getElementById('txt').value = testoWA(); }
+function copia(){ navigator.clipboard.writeText(document.getElementById('txt').value).then(() => R.toast('Copiato'), () => R.toast('Seleziona e copia a mano')); }
+function whatsapp(){
+  const t = document.getElementById('txt').value;
+  if (navigator.share) navigator.share({text: t}).catch(() => {});
+  else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank');
+}
+
+function esci(){ if (confirm('Uscire dalla regia?')) { R.setPin('regia',''); location.reload(); } }
+
+async function aggiorna(){
+  if (vista === 'piloti' && bozza) return;           // non disturbare mentre modifichi
+  if (document.activeElement && ['TEXTAREA','INPUT','SELECT'].includes(document.activeElement.tagName)) return;
+  try { const s = await R.leggi(pin); if (s.ok) { stato = s; disegna(); } } catch(e){}
+}
+function avvia(s){ stato = s; disegna(); setInterval(aggiorna, 8000); }
+if (pin) R.leggi(pin).then(s => s.ok && s.ruolo === 'regia' ? avvia(s) : (R.setPin('regia',''), R.chiediPin('regia','Regia',(p,s)=>{pin=p;avvia(s);})))
+  .catch(() => R.chiediPin('regia','Regia',(p,s)=>{pin=p;avvia(s);}));
+else R.chiediPin('regia', 'Regia', (p, s) => { pin = p; avvia(s); });
+</script>
+</body>
+</html>

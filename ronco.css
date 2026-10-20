@@ -1,0 +1,32 @@
+/* TROFEO RONCO 2026 – stile comune (colori del sito) */
+* { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; background: #f0f4f8; color: #0f172a; }
+header.bar { background: #0f172a; color: #fff; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 5; }
+header.bar h1 { margin: 0; font-size: 16px; letter-spacing: .5px; text-transform: uppercase; }
+header.bar .st { font-size: 12px; color: #94a3b8; text-align: right; line-height: 1.35; }
+.wrap { max-width: 560px; margin: 0 auto; padding: 12px 14px 40px; }
+.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; box-shadow: 0 8px 24px rgba(148,163,184,.2); }
+.note { font-size: 12px; color: #64748b; line-height: 1.4; }
+h2.sec { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #475569; margin: 18px 0 8px; }
+table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; font-size: 13px; }
+th { background: #0f172a; color: #fff; font-weight: 600; padding: 7px 4px; font-size: 11.5px; }
+td { padding: 8px 4px; border-bottom: 1px solid #f1f5f9; text-align: center; font-variant-numeric: tabular-nums; }
+td.l { text-align: left; }
+.btn { padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; background: #0284c7; color: #fff; }
+.btn.ghost { background: #fff; color: #334155; border: 1.5px solid #cbd5e1; font-weight: 700; }
+.btn.green { background: #16a34a; box-shadow: 0 4px 14px rgba(22,163,74,.3); }
+.btn.red { background: #fff; color: #b91c1c; border: 1.5px solid #fecaca; }
+.btn:disabled { background: #cbd5e1; color: #fff; box-shadow: none; border: none; }
+#toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #0f172a; color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 14px; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 50; max-width: 90vw; text-align: center; }
+#toast.show { opacity: 1; }
+.modal { position: fixed; inset: 0; background: rgba(15,23,42,.55); display: none; align-items: flex-end; justify-content: center; z-index: 30; }
+.modal.show { display: flex; }
+.sheet { background: #fff; width: 100%; max-width: 560px; border-radius: 18px 18px 0 0; padding: 16px; max-height: 85vh; overflow: auto; }
+.sheet h3 { margin: 0 0 8px; }
+.pinbox { position: fixed; inset: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 100; }
+.pincard { background: #fff; border-radius: 18px; padding: 28px 24px; width: min(340px, 90vw); text-align: center; }
+.pincard h2 { margin: 0 0 4px; }
+.pincard p { color: #64748b; margin: 4px 0 16px; }
+.pincard input { width: 100%; font-size: 28px; text-align: center; letter-spacing: 8px; padding: 10px; border: 2px solid #cbd5e1; border-radius: 12px; }
+.pincard button { width: 100%; margin-top: 12px; padding: 14px; border: none; border-radius: 12px; background: #0284c7; color: #fff; font-size: 17px; font-weight: 800; }
+.pincard .err { color: #b91c1c; min-height: 18px; margin: 10px 0 0; }

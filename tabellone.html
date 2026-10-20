@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Ronco 2026 · Tabellone</title>
+<link rel="stylesheet" href="ronco.css">
+<style>
+  body { background: #0b1220; color: #e2e8f0; overflow: hidden; height: 100vh; }
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 12px 22px; background: linear-gradient(90deg, #0284c7, #0369a1); color: #fff; }
+  .top .t1 { font-size: 26px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
+  .top .t2 { font-size: 14px; opacity: .85; }
+  .top .giro { font-size: 22px; font-weight: 800; background: rgba(255,255,255,.18); padding: 6px 16px; border-radius: 999px; }
+  .top .clock { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .main { display: grid; grid-template-columns: 1.45fr 1fr; gap: 16px; padding: 14px 18px; height: calc(100vh - 66px - 46px); }
+  .panel { background: #111a2e; border: 1px solid #1e293b; border-radius: 16px; padding: 12px 14px; overflow: hidden; display: flex; flex-direction: column; }
+  .panel h2 { margin: 0 0 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; color: #7dd3fc; }
+  .cl { flex: 1; overflow: hidden; }
+  .cl .r { display: grid; grid-template-columns: 38px 46px 1fr 70px 96px 74px 38px; align-items: center; gap: 6px; height: var(--rh, 40px); padding: 0 4px; border-bottom: 1px solid #1e293b; font-variant-numeric: tabular-nums; transition: background .6s; }
+  .cl .r.h { font-size: 11px; color: #64748b; text-transform: uppercase; border: none; padding-bottom: 2px; }
+  .cl .pos { font-size: calc(var(--rh, 40px) * .5); font-weight: 900; text-align: center; }
+  .cl .pos.p1 { color: #facc15; } .cl .pos.p2 { color: #cbd5e1; } .cl .pos.p3 { color: #f59e0b; }
+  .cl .num { font-size: 13px; color: #7dd3fc; font-weight: 700; text-align: center; background: #0c2a44; border-radius: 6px; padding: 2px 0; }
+  .cl .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cl .nm b { font-size: calc(var(--rh, 40px) * .44); color: #fff; }
+  .cl .nm small { font-size: 11px; color: #64748b; margin-left: 6px; }
+  .cl .dots { letter-spacing: 3px; color: #38bdf8; font-size: 13px; text-align: center; }
+  .cl .tot { font-size: calc(var(--rh, 40px) * .46); font-weight: 800; text-align: right; color: #fff; }
+  .cl .gap { font-size: 13px; color: #94a3b8; text-align: right; }
+  .cl .pt { font-size: 15px; font-weight: 800; color: #facc15; text-align: center; }
+  .cl .r.flash { background: rgba(56,189,248,.28); }
+  .cl .r.rit { opacity: .45; }
+  .cl .grp { font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 1px; height: 20px; padding: 6px 4px 0; }
+  .side { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+  .speaker { flex: 1.5; }
+  .bubble { background: #fff; color: #0f172a; border-radius: 16px; padding: 14px 16px; font-size: 21px; font-weight: 700; line-height: 1.3; min-height: 96px; position: relative; animation: pop .5s ease; }
+  .bubble .tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; background: #0284c7; color: #fff; border-radius: 6px; padding: 2px 8px; margin-bottom: 6px; }
+  .bubble .tag.oro { background: #ca8a04; } .bubble .tag.rosso { background: #dc2626; } .bubble .tag.storia { background: #7c3aed; }
+  @keyframes pop { from { transform: scale(.96); opacity: .3; } to { transform: scale(1); opacity: 1; } }
+  .feed { margin-top: 10px; overflow: hidden; flex: 1; }
+  .feed div { font-size: 14px; color: #cbd5e1; padding: 6px 2px; border-bottom: 1px solid #1e293b; line-height: 1.3; }
+  .feed div span { color: #64748b; font-size: 12px; margin-right: 6px; font-variant-numeric: tabular-nums; }
+  .best { flex: 1; }
+  .best .g { display: grid; grid-template-columns: 60px 1fr auto; gap: 8px; align-items: center; padding: 8px 4px; border-bottom: 1px solid #1e293b; }
+  .best .g .l { font-size: 12px; color: #7dd3fc; font-weight: 800; text-transform: uppercase; }
+  .best .g .n { font-size: 17px; font-weight: 700; color: #fff; }
+  .best .g .v { font-size: 20px; font-weight: 900; color: #facc15; font-variant-numeric: tabular-nums; }
+  .ticker { height: 46px; background: #020617; border-top: 2px solid #0284c7; display: flex; align-items: center; overflow: hidden; white-space: nowrap; }
+  .ticker .lbl { background: #0284c7; color: #fff; font-weight: 900; padding: 0 16px; height: 100%; display: flex; align-items: center; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; flex-shrink: 0; }
+  .ticker .tk { flex: 1; overflow: hidden; height: 100%; display: flex; align-items: center; }
+  .ticker .run { display: inline-block; padding-left: 100%; animation: run 60s linear infinite; font-size: 17px; color: #e2e8f0; }
+  @keyframes run { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+  .off { position: fixed; top: 74px; right: 22px; background: #dc2626; color: #fff; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; display: none; }
+  @media (max-width: 820px) { body { overflow: auto; height: auto; } .main { grid-template-columns: 1fr; height: auto; } .top .t2, .top .clock { display: none; } .cl .r { grid-template-columns: 30px 40px 1fr 56px 80px 0 30px; } .cl .gap { display: none; } }
+</style>
+</head>
+<body>
+<div class="top">
+  <div><div class="t1">Trofeo Ronco 2026</div><div class="t2">7ª edizione · prova a cronometro</div></div>
+  <div class="giro" id="giro">Giro 1</div>
+  <div class="clock" id="clock"></div>
+</div>
+<div class="off" id="off">Connessione assente</div>
+
+<div class="main">
+  <div class="panel">
+    <h2 id="clTitle">Classifica provvisoria</h2>
+    <div class="cl" id="cl"></div>
+  </div>
+  <div class="side">
+    <div class="panel speaker">
+      <h2>🎙️ Lo speaker</h2>
+      <div class="bubble" id="bubble"></div>
+      <div class="feed" id="feed"></div>
+    </div>
+    <div class="panel best">
+      <h2>⚡ Giro più veloce</h2>
+      <div id="best"></div>
+    </div>
+  </div>
+</div>
+<div class="ticker"><div class="lbl">Ronco story</div><div class="tk"><div class="run" id="run"></div></div></div>
+
+<script src="ronco.js"></script>
+<script src="storia.js"></script>
+<script>
+let pin = R.getPin('tabellone');
+let stato = null, visti = null, feed = [], flash = new Set(), ultimoCommento = Date.now();
+
+const P = num => stato.piloti.find(p => p.num === Number(num)) || {num, nome: '?', sopr: '?'};
+const nome = p => p.sopr || p.nome.split(' ')[0];
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const ora = () => new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+
+// ---------- commenti
+// i commenti escono uno ogni 4 secondi; se si accumulano, saltano quelli normali
+let codaC = [];
+function dici(testo, tipo = '', etichetta = 'Live'){
+  codaC.push({testo, tipo, etichetta});
+  while (codaC.length > 4) { const i = codaC.findIndex(c => !c.tipo); codaC.splice(i >= 0 ? i : 0, 1); }
+  ultimoCommento = Date.now();
+}
+setInterval(() => { const c = codaC.shift(); if (c) mostra(c.testo, c.tipo, c.etichetta); }, 3500);
+function mostra(testo, tipo, etichetta){
+  feed.unshift({testo, ora: ora()});
+  feed = feed.slice(0, 8);
+  const b = document.getElementById('bubble');
+  b.innerHTML = `<span class="tag ${tipo}">${etichetta}</span><br>${testo}`;
+  b.style.animation = 'none'; b.offsetHeight; b.style.animation = '';
+  document.getElementById('feed').innerHTML = feed.slice(1).map(f => `<div><span>${f.ora}</span>${f.testo}</div>`).join('');
+  ultimoCommento = Date.now();
+}
+
+function commentaTempo(num, g, val, prima){
+  const p = P(num), n = nome(p);
+  if (val === 'RIT' && R.fuori(stato, p.num, g)) return;
+  if (val === 'RIT') return dici(`Ahia! <b>${n}</b> si ferma nel giro ${g}. Un applauso comunque, il Ronco è anche questo.`, 'rosso', 'Ritiro');
+
+  const listaG = R.classificaGiro(stato, g);
+  const posG = listaG.findIndex(x => x.p.num === p.num) + 1;
+  const primaG = R.classificaGiro(prima, g);
+  const exBest = primaG[0];
+
+  // 1. cambio al comando (dal giro 2)
+  const cl = R.classifica(stato), clPrima = R.classifica(prima);
+  const me = cl.find(r => r.p.num === p.num);
+  const leaderPrima = clPrima.find(r => r.pos === 1 && r.giri === g);
+  if (g > 1 && me && me.pos === 1 && leaderPrima && leaderPrima.p.num !== p.num) {
+    const sec = cl.find(r => r.pos === 2 && r.giri === g);
+    const gap = sec ? `, ${R.gap(sec.somma - me.somma).slice(1)} su ${nome(sec.p)}` : '';
+    // pretendente vero = era tra i primi 5 dopo il giro precedente
+    const primaDi = R.classifica({piloti: stato.piloti, tempi: Object.fromEntries(Object.entries(stato.tempi).map(([k, t]) => [k, t.map((v, i) => i < g - 1 ? v : null)]))});
+    const exPos = (primaDi.find(r => r.p.num === p.num) || {}).pos || 99;
+    if (exPos <= 5) return dici(`Cambio al comando! <b>${n}</b> passa in testa dopo ${g} giri${gap}. ${pick(['Il gazebo esplode!', 'Che gara!', 'Chi lo ferma?'])}`, 'oro', 'Nuovo leader');
+    return dici(`<b>${n}</b> si siede sulla poltrona del leader provvisorio dopo ${g} giri${gap}. Ma i più veloci devono ancora arrivare…`, '', 'Hot seat');
+  }
+  // 2. giro più veloce
+  if (posG === 1 && listaG.length > 1) {
+    const frase = exBest ? ` ${nome(exBest.p)} scalzato di ${R.gap(exBest.v - val).slice(1)}.` : '';
+    return dici(`Giro ${g} più veloce: <b>${n}</b> in ${R.fmt(val)}!${frase} ${pick(['Che manetta!', 'Chi fa meglio?', 'Applausi al gazebo.', ''])}`, 'oro', 'Giro record');
+  }
+  // 3. sfida storica: quando arriva il secondo dei due
+  for (const [a, b, titolo, prec] of STORIA.sfide) {
+    if (p.num !== a && p.num !== b) continue;
+    const altro = p.num === a ? b : a;
+    const ra = cl.find(r => r.p.num === p.num), rb = cl.find(r => r.p.num === altro);
+    if (!ra || !rb || ra.giri !== g || rb.giri !== g) continue;
+    const davanti = ra.somma <= rb.somma ? ra : rb, dietro = davanti === ra ? rb : ra;
+    return dici(`${titolo}: dopo ${g} ${g > 1 ? 'giri' : 'giro'} <b>${nome(davanti.p)}</b> davanti a ${nome(dietro.p)} di ${R.gap(dietro.somma - davanti.somma).slice(1)}. Precedenti: ${prec}`, 'storia', 'La sfida');
+  }
+  // 4. progresso rispetto al giro prima
+  const prev = (stato.tempi[p.num] || [])[g - 2];
+  if (g > 1 && R.ok(prev)) {
+    const d = val - prev;
+    if (d <= -2) return dici(`<b>${n}</b> si scalda: ${R.fmt(val)}, ${Math.abs(d).toFixed(2).replace('.', ',')} meglio del giro ${g-1}. ${me && me.pos ? `Ora è ${me.pos}°.` : ''}`, '', 'In crescita');
+    if (d >= 6) return dici(`<b>${n}</b> perde ${d.toFixed(2).replace('.', ',')} sul giro ${g-1}… tutto bene nel bosco? ${me && me.pos ? `Resta ${me.pos}°.` : ''}`, 'rosso', 'Occhio');
+  }
+  // 5. normale, con un pizzico di storia
+  const curios = STORIA.piloti[p.num];
+  const extra = curios && Math.random() < 0.6 ? ` <i>${pick(curios)}.</i>` : '';
+  dici(`<b>${n}</b> chiude il giro ${g} in ${R.fmt(val)}: ${posG}° nel giro${me && me.pos && g > 1 ? `, ${me.pos}° provvisorio dopo ${g} giri` : ''}.${extra}`);
+}
+
+function commentaFineGiro(g){
+  const cl = R.classifica(stato);
+  const [a, b] = cl.filter(r => r.pos);
+  if (g < 3) {
+    dici(`Giro ${g} archiviato! Comanda <b>${nome(a.p)}</b>${b ? ` con ${R.gap(b.somma - a.somma).slice(1)} su ${nome(b.p)}` : ''}. ${pick(['Si riparte!', 'Niente è deciso.', 'Tutto aperto.'])}`, 'oro', `Fine giro ${g}`);
+  } else {
+    let storia = '';
+    if (a.p.num === 114 || a.p.num === 118) storia = ` Quarta vittoria: la bella è di ${nome(a.p)}!`;
+    else storia = ` Per la prima volta in sette edizioni non vince né Rover né Caste. Storico!`;
+    dici(`🏁 Crono finito! Vince <b>${nome(a.p)}</b> in ${R.fmt(a.somma)}${b ? `, ${R.gap(b.somma - a.somma).slice(1)} su ${nome(b.p)}` : ''}.${storia}`, 'oro', 'Vincitore enduro');
+  }
+}
+
+// ---------- confronto tra lettura precedente e attuale
+function novita(nuovo){
+  if (!visti) {   // prima lettura: nessun commento sui tempi già presenti
+    visti = JSON.parse(JSON.stringify(nuovo.tempi));
+    stato = nuovo;
+    const g = Math.min(R.giroInCorso(nuovo), 3);
+    mostra(`Benvenuti al <b>Trofeo Ronco 2026</b>, ${STORIA.edizione}! ${pick(STORIA.curiosita)}`, 'storia', 'Ronco story');
+    return;
+  }
+  const prima = stato;
+  const giroPrima = R.giroInCorso(prima);
+  const arrivati = [];
+  for (const num in nuovo.tempi) for (let g = 1; g <= 3; g++) {
+    const v = nuovo.tempi[num][g - 1], vecchio = (visti[num] || [])[g - 1];
+    if (v != null && v !== vecchio) arrivati.push({num: Number(num), g, v});
+  }
+  // commenta in sequenza: lo stato "prima" cresce un tempo alla volta
+  let passo = JSON.parse(JSON.stringify(prima));
+  stato = nuovo;
+  arrivati.forEach(x => {
+    const dopo = JSON.parse(JSON.stringify(passo));
+    (dopo.tempi[x.num] = dopo.tempi[x.num] || [null,null,null])[x.g - 1] = x.v;
+    const salva = stato; stato = dopo;
+    commentaTempo(x.num, x.g, x.v, passo);
+    stato = salva; passo = dopo;
+    flash.add(x.num);
+  });
+  const giroOra = R.giroInCorso(nuovo);
+  if (giroOra > giroPrima) commentaFineGiro(giroOra - 1);
+  visti = JSON.parse(JSON.stringify(nuovo.tempi));
+}
+
+// ---------- disegno
+function disegna(){
+  const g = R.giroInCorso(stato);
+  document.getElementById('giro').textContent = g > 3 ? '🏁 Finale' : `Giro ${g} in corso`;
+  document.getElementById('clTitle').textContent = g > 3 ? 'Classifica enduro' : 'Classifica provvisoria';
+  const cl = R.classifica(stato);
+  document.getElementById('cl').innerHTML =
+    `<div class="r h"><span>Pos</span><span>N°</span><span>Pilota</span><span>Giri</span><span style="text-align:right">Tempo</span><span style="text-align:right">Distacco</span><span>Pt</span></div>` +
+    cl.map((r, i) => (i === 0 || cl[i-1].giri !== r.giri || cl[i-1].rit !== r.rit) && (r.giri || r.rit) ? `<div class="grp">${r.rit ? 'Ritirati' : (r.giri === 3 ? 'Hanno chiuso 3 giri' : `Dopo ${r.giri} ${r.giri > 1 ? 'giri' : 'giro'}`)}</div>` + riga(r) : riga(r)).join('');
+  function riga(r){ return `<div class="r ${flash.has(r.p.num) ? 'flash' : ''} ${r.rit ? 'rit' : ''}">
+      <span class="pos p${r.pos}">${r.pos || ''}</span><span class="num">${r.p.num}</span>
+      <span class="nm"><b>${R.esc(nome(r.p))}</b><small>${R.esc(r.p.nome)}</small></span>
+      <span class="dots">${'●'.repeat(r.giri)}${'○'.repeat(3 - r.giri)}</span>
+      <span class="tot">${r.rit ? 'Rit.' : (r.giri ? R.fmt(r.somma) : '')}</span>
+      <span class="gap">${r.distacco != null ? R.gap(r.distacco) : ''}</span>
+      <span class="pt">${r.punti ?? ''}</span></div>`; }
+  // altezza righe: tutta la classifica deve stare nello schermo
+  const box = document.getElementById('cl'), nRighe = box.querySelectorAll('.r:not(.h)').length, nGrp = box.querySelectorAll('.grp').length;
+  if (innerWidth > 820) box.style.setProperty('--rh', Math.max(24, Math.min(46, Math.floor((box.clientHeight - 22 - nGrp * 20) / Math.max(nRighe, 1)))) + 'px');
+  setTimeout(() => { flash.clear(); document.querySelectorAll('.r.flash').forEach(e => e.classList.remove('flash')); }, 4000);
+
+  document.getElementById('best').innerHTML = [1,2,3].map(n => {
+    const b = R.classificaGiro(stato, n)[0];
+    return `<div class="g"><span class="l">Giro ${n}</span><span class="n">${b ? R.esc(nome(b.p)) : '<span style="color:#475569">–</span>'}</span><span class="v">${b ? R.fmt(b.v) : ''}</span></div>`;
+  }).join('');
+}
+
+function ticker(){
+  const frasi = STORIA.curiosita.slice();
+  Object.entries(STORIA.piloti).forEach(([num, f]) => { const p = stato.piloti.find(x => x.num === +num && x.presente); if (p) frasi.push(`${nome(p)}: ${f[0]}`); });
+  document.getElementById('run').textContent = frasi.sort(() => Math.random() - .5).join('   •   ');
+}
+
+// ---------- ciclo
+async function leggi(){
+  try {
+    const s = await R.leggi(pin);
+    document.getElementById('off').style.display = 'none';
+    if (!s.ok) { R.setPin('tabellone', ''); location.reload(); return; }
+    novita(s); disegna();
+  } catch(e) { document.getElementById('off').style.display = 'block'; }
+}
+function silenzio(){ // dopo 45" senza tempi, una curiosità
+  if (Date.now() - ultimoCommento > 45000) {
+    const vivi = stato.piloti.filter(p => p.presente && STORIA.piloti[p.num]);
+    if (Math.random() < .5 && vivi.length) { const p = pick(vivi); dici(`Lo sapevate? <b>${nome(p)}</b>: ${pick(STORIA.piloti[p.num])}.`, 'storia', 'Ronco story'); }
+    else dici(pick(STORIA.curiosita), 'storia', 'Ronco story');
+  }
+}
+setInterval(() => document.getElementById('clock').textContent = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}), 1000);
+
+// schermo sempre acceso (se il browser lo permette)
+async function svegli(){ try { await navigator.wakeLock.request('screen'); } catch(e){} }
+document.addEventListener('click', svegli); document.addEventListener('visibilitychange', () => { if (!document.hidden) svegli(); });
+
+function avvia(s){ novita(s); disegna(); ticker(); setInterval(leggi, 5000); setInterval(silenzio, 15000); setInterval(ticker, 300000); svegli(); }
+if (pin) R.leggi(pin).then(s => s.ok ? avvia(s) : (R.setPin('tabellone',''), R.chiediPin('tabellone', 'Tabellone', (p, s) => { pin = p; avvia(s); })))
+  .catch(() => R.chiediPin('tabellone', 'Tabellone', (p, s) => { pin = p; avvia(s); }));
+else R.chiediPin('tabellone', 'Tabellone', (p, s) => { pin = p; avvia(s); });
+</script>
+</body>
+</html>

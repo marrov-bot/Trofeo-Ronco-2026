@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Ronco 2026 · Crono</title>
+<link rel="stylesheet" href="ronco.css">
+<style>
+  .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+  .tabs button { padding: 10px 0; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #fff; font-size: 15px; font-weight: 700; color: #334155; }
+  .tabs button.on { background: #0284c7; border-color: #0284c7; color: #fff; }
+  .tabs small { display: block; font-weight: 500; font-size: 11px; opacity: .8; }
+  .pilot { text-align: center; }
+  .pilot .num { font-size: 46px; font-weight: 800; color: #0284c7; line-height: 1; }
+  .pilot .name { font-size: 21px; font-weight: 700; margin-top: 4px; }
+  .pilot .meta { font-size: 12px; color: #64748b; margin-top: 4px; min-height: 15px; }
+  .pilot .meta b { color: #b45309; }
+  .nav { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 6px; margin: 12px 0 4px; }
+  .nav button { background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 4px; font-size: 13px; color: #334155; }
+  .display { margin: 10px 0 4px; text-align: center; font-variant-numeric: tabular-nums; font-size: 56px; font-weight: 800; color: #0f172a; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 14px; padding: 8px 0; }
+  .display.empty { color: #cbd5e1; }
+  .display.bad { border-color: #ef4444; color: #ef4444; }
+  .hint { text-align: center; font-size: 12px; color: #64748b; margin-bottom: 8px; min-height: 16px; }
+  .hint.warn { color: #b45309; font-weight: 600; }
+  .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .pad button { padding: 15px 0; font-size: 26px; font-weight: 700; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; color: #0f172a; box-shadow: 0 2px 0 #e2e8f0; }
+  .pad button:active { background: #e0f2fe; }
+  .pad .del { font-size: 20px; color: #b91c1c; }
+  .actions { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-top: 10px; }
+  .done { text-align: center; padding: 20px 6px; }
+  .done .big { font-size: 42px; }
+  tr.cur td { background: #e0f2fe; }
+  tr.pend td { color: #b45309; }
+  td.t { color: #0369a1; font-weight: 600; text-decoration: underline dotted; cursor: pointer; }
+  .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 6px; border-bottom: 1px solid #f1f5f9; font-size: 15px; }
+  .row b { color: #0284c7; margin-right: 8px; }
+  .row .st { font-size: 13px; color: #64748b; font-variant-numeric: tabular-nums; }
+  .numfind { width: 100%; font-size: 22px; padding: 10px; border: 2px solid #cbd5e1; border-radius: 10px; margin-bottom: 8px; text-align: center; }
+</style>
+</head>
+<body>
+<header class="bar">
+  <h1>Ronco 2026 · Crono</h1>
+  <span class="st"><span id="cnt"></span><br><span id="sync">…</span></span>
+</header>
+
+<div class="wrap">
+  <div class="tabs" id="tabs"></div>
+  <div class="card" id="entry"></div>
+
+  <h2 class="sec" id="tblTitle">Giro</h2>
+  <table id="tbl"></table>
+  <p class="note">Tocca un tempo per correggerlo. In arancione: tempo salvato sul telefono ma non ancora arrivato al foglio (parte da solo appena c'è rete).</p>
+  <p class="note" style="text-align:center;margin-top:24px"><a href="#" onclick="esci();return false" style="color:#94a3b8">Esci (cancella il PIN da questo telefono)</a></p>
+</div>
+
+<div class="modal" id="modal" onclick="if(event.target===this)chiudi()"><div class="sheet" id="sheet"></div></div>
+
+<script src="ronco.js"></script>
+<script>
+const QKEY = 'ronco26_coda';
+let pin = R.getPin('crono');
+let server = null;                 // ultimo stato ricevuto dal foglio
+let coda = caricaCoda();           // tempi da inviare
+let giro = null, cur = null, cifre = '', correggi = null, invio = false;
+
+function caricaCoda(){ try { return JSON.parse(localStorage.getItem(QKEY)) || []; } catch(e){ return []; } }
+function salvaCoda(){ try { localStorage.setItem(QKEY, JSON.stringify(coda)); } catch(e){} }
+
+// stato visto dalla pagina = foglio + tempi in coda
+function stato(){
+  const s = { piloti: server.piloti, tempi: JSON.parse(JSON.stringify(server.tempi)) };
+  coda.forEach(q => { (s.tempi[q.num] = s.tempi[q.num] || [null,null,null])[q.giro-1] = q.val; });
+  return s;
+}
+const presenti = () => server.piloti.filter(p => p.presente).sort((a,b) => a.ordine - b.ordine);
+const tempo = (s, num, g) => (s.tempi[num] || [])[g-1] ?? null;
+const inCoda = (num, g) => coda.some(q => q.num === num && q.giro === g);
+
+function prossimo(daNum){
+  const s = stato(), lista = presenti();
+  const start = daNum == null ? -1 : lista.findIndex(p => p.num === daNum);
+  for (let k = 1; k <= lista.length; k++){
+    const p = lista[(start + k + lista.length) % lista.length];
+    if (tempo(s, p.num, giro) == null && !R.fuori(s, p.num, giro)) return p.num;
+  }
+  return null;
+}
+
+// ---------- disegno
+function disegna(){
+  const s = stato(), lista = presenti();
+  document.getElementById('tabs').innerHTML = [1,2,3].map(g => {
+    const c = lista.filter(p => tempo(s,p.num,g) != null).length, att = lista.filter(p => !R.fuori(s,p.num,g)).length;
+    return `<button class="${g===giro?'on':''}" onclick="vaiGiro(${g})">Giro ${g}<small>${Math.min(c,att)}/${att}</small></button>`;
+  }).join('');
+  const tot = lista.reduce((a,p) => a + [1,2,3].filter(g => tempo(s,p.num,g) != null).length, 0);
+  document.getElementById('cnt').textContent = `${tot}/${lista.length*3} tempi`;
+  document.getElementById('sync').textContent = coda.length ? `⏳ ${coda.length} da inviare` : '☁️ foglio aggiornato';
+
+  const card = document.getElementById('entry');
+  const target = correggi || (cur != null ? {num: cur, giro} : null);
+  if (!target){
+    card.innerHTML = `<div class="done"><div class="big">✅</div><b>Giro ${giro} completo</b>
+      ${giro < 3 ? `<p class="note">Quando partono, passa al giro successivo.</p><button class="btn green" style="width:100%" onclick="vaiGiro(${giro+1})">Vai al giro ${giro+1}</button>` : '<p class="note">Prova cronometrata finita. Marco chiude dalla regia.</p>'}</div>`;
+  } else {
+    const p = server.piloti.find(x => x.num === target.num);
+    const att = tempo(s, target.num, target.giro);
+    const prev = target.giro > 1 ? tempo(s, target.num, target.giro-1) : null;
+    const par = R.daCifre(cifre), bad = par && par.errore;
+    let avviso = '';
+    if (par && !bad && R.ok(prev) && Math.abs(par.val - prev) > 30) avviso = `Attenzione: giro ${target.giro-1} era ${R.fmt(prev)}`;
+    if (par && !bad && cifre.length >= 5 && (par.val < 90 || par.val > 900)) avviso = 'Tempo strano: controlla le cifre';
+    card.innerHTML = `
+      <div class="pilot">
+        <div class="num">${p.num}</div>
+        <div class="name">${R.esc(p.nome)}</div>
+        <div class="meta">${correggi ? '<b>CORREZIONE</b> · ' : ''}Giro ${target.giro}${att != null ? ' · ora: ' + R.fmt(att) : ''}${R.ok(prev) ? ' · giro prima ' + R.fmt(prev) : ''}</div>
+      </div>
+      ${correggi ? '' : `<div class="nav"><button onclick="sposta(-1)">◀ Indietro</button><button onclick="scegli()">🔎 Altro pilota</button><button onclick="sposta(1)">Salta ▶</button></div>`}
+      <div class="display ${cifre?'':'empty'} ${bad?'bad':''}">${R.cifreDisplay(cifre)}</div>
+      <div class="hint ${bad||avviso?'warn':''}">${bad ? 'Secondi oltre 59: controlla' : (avviso || 'Cifre di seguito: 32515 = 3:25,15')}</div>
+      <div class="pad">
+        ${[1,2,3,4,5,6,7,8,9].map(n => `<button onclick="tasto('${n}')">${n}</button>`).join('')}
+        <button class="del" onclick="tasto('C')">C</button><button onclick="tasto('0')">0</button><button class="del" onclick="tasto('<')">⌫</button>
+      </div>
+      <div class="actions">
+        <button class="btn red" onclick="ritirato()">Ritirato</button>
+        <button class="btn green" ${(!cifre||bad)?'disabled':''} onclick="conferma()">✔ Conferma</button>
+      </div>
+      ${correggi ? `<div class="actions" style="grid-template-columns:1fr 1fr"><button class="btn ghost" onclick="annulla()">Annulla</button><button class="btn ghost" onclick="cancella()">Cancella tempo</button></div>` : ''}`;
+  }
+
+  document.getElementById('tblTitle').textContent = `Giro ${giro} · ordine di partenza`;
+  document.getElementById('tbl').innerHTML = `<tr><th>N°</th><th style="text-align:left">Pilota</th><th>G1</th><th>G2</th><th>G3</th></tr>` +
+    lista.map(p => `<tr class="${p.num===cur && !correggi ? 'cur':''} ${[1,2,3].some(g=>inCoda(p.num,g))?'pend':''}">
+      <td>${p.num}</td><td class="l">${R.esc(p.nome)}</td>
+      ${[1,2,3].map(g => { const v = tempo(s,p.num,g); return v != null ? `<td class="t" onclick="startCorreggi(${p.num},${g})">${R.fmt(v)}</td>` : '<td style="color:#cbd5e1">–</td>'; }).join('')}
+    </tr>`).join('');
+}
+
+// ---------- azioni
+function vaiGiro(g){ giro = g; correggi = null; cifre = ''; cur = prossimo(null); disegna(); scrollTo({top:0,behavior:'smooth'}); }
+function tasto(k){
+  if (k === 'C') cifre = '';
+  else if (k === '<') cifre = cifre.slice(0, -1);
+  else if (cifre.length < 6) cifre = (cifre + k).replace(/^0+(?=\d)/, '');
+  disegna();
+}
+function registra(num, g, val){
+  coda = coda.filter(q => !(q.num === num && q.giro === g));
+  coda.push({num, giro: g, val});
+  salvaCoda(); invia();
+}
+function conferma(){
+  const par = R.daCifre(cifre); if (!par || par.errore) return;
+  const t = correggi || {num: cur, giro};
+  const p = server.piloti.find(x => x.num === t.num);
+  if ((par.val < 90 || par.val > 900) && !confirm(`${R.fmt(par.val)} per ${p.nome}: sicuro? Sembra un tempo strano.`)) return;
+  registra(t.num, t.giro, par.val);
+  R.toast(`✔ ${p.num} ${p.nome} · G${t.giro} ${R.fmt(par.val)}`);
+  if (correggi) correggi = null; else cur = prossimo(cur);
+  cifre = ''; disegna();
+}
+function ritirato(){
+  const t = correggi || {num: cur, giro};
+  const p = server.piloti.find(x => x.num === t.num);
+  if (!confirm(`${p.nome} ritirato nel giro ${t.giro}?`)) return;
+  registra(t.num, t.giro, 'RIT');
+  if (correggi) correggi = null; else cur = prossimo(cur);
+  cifre = ''; disegna();
+}
+function cancella(){
+  const p = server.piloti.find(x => x.num === correggi.num);
+  if (!confirm(`Cancellare il tempo di ${p.nome} nel giro ${correggi.giro}?`)) return;
+  registra(correggi.num, correggi.giro, null);
+  correggi = null; cifre = ''; cur = prossimo(null); disegna();
+}
+function sposta(d){
+  const lista = presenti(), i = lista.findIndex(p => p.num === cur);
+  cur = lista[(i + d + lista.length) % lista.length].num; cifre = ''; disegna();
+}
+function startCorreggi(num, g){ correggi = {num, giro: g}; cifre = ''; disegna(); scrollTo({top:0,behavior:'smooth'}); }
+function annulla(){ correggi = null; cifre = ''; disegna(); }
+
+function scegli(){
+  const s = stato();
+  document.getElementById('sheet').innerHTML = `<h3>Giro ${giro} · scegli il pilota</h3>
+    <input class="numfind" id="nf" inputmode="numeric" placeholder="Scrivi il numero, es. 114" oninput="filtra()">
+    <div id="lst">${presenti().map(p => `<div class="row" data-n="${p.num}" onclick="cur=${p.num};cifre='';chiudi();disegna()"><span><b>${p.num}</b>${R.esc(p.nome)}</span><span class="st">${tempo(s,p.num,giro) != null ? R.fmt(tempo(s,p.num,giro)) : ''}</span></div>`).join('')}</div>`;
+  document.getElementById('modal').classList.add('show');
+}
+function filtra(){ const v = document.getElementById('nf').value; document.querySelectorAll('#lst .row').forEach(r => r.style.display = r.dataset.n.includes(v) ? '' : 'none'); }
+function chiudi(){ document.getElementById('modal').classList.remove('show'); }
+function esci(){ if (confirm('Uscire? Dovrai reinserire il PIN.')) { R.setPin('crono',''); location.reload(); } }
+
+// ---------- sincronizzazione con il foglio
+async function invia(){
+  if (invio) return; invio = true;
+  while (coda.length){
+    const q = coda[0];
+    try {
+      const r = await R.scrivi({a:'tempo', pin, num:q.num, giro:q.giro, val:q.val});
+      if (!r.ok){ if (r.errore === 'pin') { R.setPin('crono',''); location.reload(); } break; }
+      server = r;
+      if (coda[0] === q) coda.shift();
+      salvaCoda();
+    } catch(e){ break; }
+  }
+  invio = false; disegna();
+}
+async function aggiorna(){
+  if (coda.length) return invia();
+  try {
+    const r = await R.leggi(pin);
+    if (r.ok){ server = r; try { localStorage.setItem('ronco26_ultimo', JSON.stringify(r)); } catch(e){} if (cur == null && !correggi) cur = prossimo(null); disegna(); }
+  } catch(e){ document.getElementById('sync').textContent = '📵 offline'; }
+}
+
+function avvia(s){
+  server = s;
+  try { localStorage.setItem('ronco26_ultimo', JSON.stringify(s)); } catch(e){}
+  giro = Math.min(R.giroInCorso(stato()), 3);
+  cur = prossimo(null);
+  disegna();
+  setInterval(aggiorna, 6000);
+  addEventListener('online', invia);
+  invia();
+}
+
+if (pin){
+  R.leggi(pin).then(s => s.ok ? avvia(s) : (R.setPin('crono',''), R.chiediPin('crono','Crono', (p,s) => { pin = p; avvia(s); })))
+    .catch(() => {   // senza rete: riparte dall'ultimo stato salvato
+      try { const s = JSON.parse(localStorage.getItem('ronco26_ultimo')); if (s) return avvia(s); } catch(e){}
+      R.chiediPin('crono','Crono', (p,s) => { pin = p; avvia(s); });
+    });
+} else {
+  R.chiediPin('crono', 'Crono', (p, s) => { pin = p; avvia(s); });
+}
+</script>
+</body>
+</html>
