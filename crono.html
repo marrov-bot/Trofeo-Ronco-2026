@@ -305,25 +305,28 @@ function esci(){ if (confirm('Uscire? Dovrai reinserire il PIN.')) { R.setPin('c
 
 // ---------- sincronizzazione con il foglio
 async function invia(){
-  if (invio) return; invio = true;
-  while (coda.length){
-    const q = coda[0];
-    try {
-      const r = await R.scrivi({a:'tempo', pin, num:q.num, giro:q.giro, val:q.val});
-      if (!r.ok){ if (r.errore === 'pin') { R.setPin('crono',''); location.reload(); } break; }
+  if (invio || !coda.length) return; invio = true;
+  // tutti i tempi in coda partono insieme in un solo invio: si recupera subito anche dopo un inserimento veloce
+  const pacco = coda.slice();
+  try {
+    const r = await R.scrivi({a: 'tempi', pin, lista: pacco.map(q => ({num: q.num, giro: q.giro, val: q.val}))});
+    if (!r.ok){ if (r.errore === 'pin') { R.setPin('crono',''); location.reload(); } }
+    else {
       server = r;
-      if (coda[0] === q) coda.shift();
+      try { localStorage.setItem('ronco26_ultimo', JSON.stringify(r)); } catch(e){}
+      coda = coda.filter(q => !pacco.includes(q));   // tolgo solo quelli inviati: quelli nuovi restano
       salvaCoda();
-    } catch(e){ break; }
-  }
+    }
+  } catch(e){}
   invio = false; disegna();
+  if (coda.length) setTimeout(invia, 500);           // nel frattempo ne sono arrivati altri
 }
 async function aggiorna(){
   if (coda.length) return invia();
   try {
     const r = await R.leggi(pin);
     if (r.ok){ server = r; try { localStorage.setItem('ronco26_ultimo', JSON.stringify(r)); } catch(e){} if (cur == null && !correggi) cur = prossimo(null); disegna(); }
-  } catch(e){ document.getElementById('sync').textContent = '📵 offline'; }
+  } catch(e){ if (e.message !== 'occupato') document.getElementById('sync').textContent = '📵 offline'; }
 }
 
 function avvia(s){

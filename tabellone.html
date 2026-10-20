@@ -390,7 +390,7 @@ async function leggi(){
     document.getElementById('off').style.display = 'none';
     if (!s.ok) { R.setPin('tabellone', ''); location.reload(); return; }
     novita(s); disegna();
-  } catch(e) { document.getElementById('off').style.display = 'block'; }
+  } catch(e) { if (e.message !== 'occupato') document.getElementById('off').style.display = 'block'; }
 }
 function silenzio(){ // dopo 45" senza tempi, una curiosità
   if (Date.now() - ultimoCommento > 45000) {

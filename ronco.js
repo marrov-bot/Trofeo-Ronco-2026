@@ -12,14 +12,23 @@ const R = {
   setPin(page, v) { try { v ? localStorage.setItem(R.pinKey(page), v) : localStorage.removeItem(R.pinKey(page)); } catch (e) {} },
 
   // ---------- chiamate allo script
+  // fetch con tempo massimo: se lo script non risponde, si rinuncia e si riprova dopo
+  async _fetch(url, opz, ms) {
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), ms);
+    try { const r = await fetch(url, Object.assign({ signal: ctl.signal }, opz)); return await r.json(); }
+    finally { clearTimeout(t); }
+  },
+  _inLettura: false,
+  // una sola lettura alla volta: se la precedente non è finita, questa si salta
   async leggi(pin) {
-    const r = await fetch(API_URL + '?a=stato&pin=' + encodeURIComponent(pin) + '&t=' + Date.now());
-    return r.json();
+    if (R._inLettura) throw new Error('occupato');
+    R._inLettura = true;
+    try { return await R._fetch(API_URL + '?a=stato&pin=' + encodeURIComponent(pin) + '&t=' + Date.now(), {}, 20000); }
+    finally { R._inLettura = false; }
   },
   async scrivi(dati) {
     // text/plain: nessun controllo preliminare del browser, la risposta è leggibile
-    const r = await fetch(API_URL, { method: 'POST', body: JSON.stringify(dati) });
-    return r.json();
+    return R._fetch(API_URL, { method: 'POST', body: JSON.stringify(dati) }, 30000);
   },
 
   // ---------- tempi
