@@ -27,7 +27,7 @@
   .cl .num { font-size: .72em; color: #7dd3fc; font-weight: 700; text-align: center; background: #0c2a44; border-radius: 6px; padding: 2px 0; }
   .cl .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .cl .nm b { font-size: 1em; color: #fff; }
-  .cl .nm small { display: none; }
+  .cl .nm small { font-size: .68em; color: #94a3b8; margin-left: 8px; font-weight: 500; }
   .cl .dots { letter-spacing: 2px; color: #38bdf8; font-size: .6em; text-align: center; }
   .cl .tot { font-size: 1.02em; font-weight: 800; text-align: right; color: #fff; }
   .cl .gap { font-size: .72em; color: #94a3b8; text-align: right; }
@@ -40,8 +40,8 @@
   .xb { background: #0b1324; border: 1px solid #1e293b; border-radius: 12px; padding: 8px 10px; overflow: hidden; }
   .xb.fin { grid-column: span 2; }
   .xb h3 { margin: 0 0 6px; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: #7dd3fc; }
-  .xr { display: grid; grid-template-columns: 1.4em 1fr auto; gap: 8px; align-items: center; font-size: 21px; padding: 5px 2px; border-bottom: 1px solid #1e293b; }
-  .xr b { color: #fff; } .xr .p { font-weight: 900; color: #facc15; text-align: center; }
+  .xr { display: grid; grid-template-columns: 1.4em minmax(0,1fr) auto; gap: 8px; align-items: center; font-size: 17px; padding: 5px 2px; border-bottom: 1px solid #1e293b; }
+  .xr b, .xr > span:nth-child(2) { color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; } .xr .p { font-weight: 900; color: #facc15; text-align: center; }
   .xr.wait { opacity: .45; font-size: 18px; } .xr .q { font-size: 12px; font-weight: 800; color: #0b1220; background: #facc15; border-radius: 6px; padding: 2px 6px; }
   .xr.dsq { opacity: .45; text-decoration: line-through; }
   .xt { width: 100%; border-collapse: collapse; font-size: 20px; background: transparent; color: #cbd5e1; border-radius: 0; }
@@ -111,6 +111,10 @@
 let pin = R.getPin('tabellone');
 let stato = null, visti = null, feed = [], flash = new Set(), ultimoCommento = Date.now();
 
+// nelle liste nome e cognome per intero; i soprannomi li usa solo lo speaker
+const pieno = p => p ? p.nome : '';
+const pienoN = num => pieno(stato.piloti.find(x => x.num === Number(num)));
+const copPiena = n => { const c = (stato.coppie || []).find(x => x.n === n); return c ? pienoN(c.a) + (c.b ? ' – ' + pienoN(c.b) : ' 🏃') : '?'; };
 const P = num => stato.piloti.find(p => p.num === Number(num)) || {num, nome: '?', sopr: '?'};
 const nome = p => p.sopr || p.nome.split(' ')[0];
 const pick = a => a[Math.floor(Math.random() * a.length)];
@@ -265,7 +269,7 @@ function disegna(){
     if (giro.length) html += `<div class="grp">Classifica del giro ${gg}</div>`;
     giro.forEach((x, i) => {
       const c = cum(x.p.num);
-      html += T(i + 1, x.p.num, R.esc(nome(x.p)), R.fmt(x.v), i ? R.gap(x.v - best.v) : '',
+      html += T(i + 1, x.p.num, R.esc(pieno(x.p)), R.fmt(x.v), i ? R.gap(x.v - best.v) : '',
                mostraTot ? R.fmt(c.somma) : '', mostraTot && c.pos ? c.pos + '°' : '', fl(x.p.num));
     });
     // 2) chi deve ancora passare: totale dopo il giro precedente
@@ -273,16 +277,16 @@ function disegna(){
     if (attesa.length) {
       html += `<div class="grp">Devono ancora passare${mostraTot ? ' · totale dopo 1 giro' : ''}</div>`;
       const ord = mostraTot ? attesa : attesa.sort((a, b) => a.p.ordine - b.p.ordine);
-      ord.forEach(r => { html += T('', r.p.num, R.esc(nome(r.p)), '', '', mostraTot && r.giri ? R.fmt(r.somma) : '', mostraTot && r.pos ? r.pos + '°' : '', 'wait'); });
+      ord.forEach(r => { html += T('', r.p.num, R.esc(pieno(r.p)), '', '', mostraTot && r.giri ? R.fmt(r.somma) : '', mostraTot && r.pos ? r.pos + '°' : '', 'wait'); });
     }
   } else {
     // crono finito: classifica finale sul totale, con punti
     html += H('Totale', 'Distacco', 'Giro 3', 'Pt');
-    cl.filter(r => !r.rit).forEach(r => { html += T(r.pos, r.p.num, R.esc(nome(r.p)), R.fmt(r.somma), r.distacco != null ? R.gap(r.distacco) : '', R.fmt(r.t[2]), r.punti ?? '', fl(r.p.num)); });
+    cl.filter(r => !r.rit).forEach(r => { html += T(r.pos, r.p.num, R.esc(pieno(r.p)), R.fmt(r.somma), r.distacco != null ? R.gap(r.distacco) : '', R.fmt(r.t[2]), r.punti ?? '', fl(r.p.num)); });
   }
   if (g > 3 && !svelata) html += `<div class="lock">🔒 Classifica finale e punti<br><small>alla premiazione</small></div>`;
   const rit = cl.filter(r => r.rit);
-  if (rit.length) { html += `<div class="grp">Ritirati</div>`; rit.forEach(r => { html += T('', r.p.num, R.esc(nome(r.p)), 'Rit.', '', '', '', 'rit'); }); }
+  if (rit.length) { html += `<div class="grp">Ritirati</div>`; rit.forEach(r => { html += T('', r.p.num, R.esc(pieno(r.p)), 'Rit.', '', '', '', 'rit'); }); }
   box.innerHTML = html;
   // altezza righe: tutta la classifica deve stare nello schermo
   const nRighe = box.querySelectorAll('.r:not(.h)').length, nGrp = box.querySelectorAll('.grp').length;
@@ -291,7 +295,7 @@ function disegna(){
 
   document.getElementById('best').innerHTML = [1,2,3].map(n => {
     const b = R.classificaGiro(stato, n)[0];
-    return `<div class="g"><span class="l">Giro ${n}</span><span class="n">${b ? R.esc(nome(b.p)) : '<span style="color:#475569">–</span>'}</span><span class="v">${b ? R.fmt(b.v) : ''}</span></div>`;
+    return `<div class="g"><span class="l">Giro ${n}</span><span class="n">${b ? R.esc(pieno(b.p)) : '<span style="color:#475569">–</span>'}</span><span class="v">${b ? R.fmt(b.v) : ''}</span></div>`;
   }).join('');
 }
 
@@ -311,12 +315,12 @@ function disegnaCross(){
     document.getElementById('clTitle').textContent = 'Classifica assoluta 2026';
     const fs = Math.max(14, Math.min(22, Math.floor((box.clientHeight - 30) / ((stato.assoluta || []).length + 1) * .55)));
     box.innerHTML = `<table class="xt" style="font-size:${fs}px"><tr><th>Pos</th><th class="l">Pilota</th><th>Enduro</th><th>Cross</th><th>Pen.</th><th>Totale</th></tr>` +
-      (stato.assoluta || []).map(r => `<tr><td class="p">${r.pos}</td><td class="l"><b>${R.esc(sp(r.num))}</b></td><td>${r.enduro}</td><td>${r.cross}</td><td>${r.pen ? '−' + r.pen : ''}</td><td class="t">${r.tot}</td></tr>`).join('') + '</table>';
+      (stato.assoluta || []).map(r => `<tr><td class="p">${r.pos}</td><td class="l"><b>${R.esc(pienoN(r.num))}</b></td><td>${r.enduro}</td><td>${r.cross}</td><td>${r.pen ? '−' + r.pen : ''}</td><td class="t">${r.tot}</td></tr>`).join('') + '</table>';
   } else if (sv.cross) {
     document.getElementById('giro').textContent = '🏍️ Classifica cross';
     document.getElementById('clTitle').textContent = 'Classifica cross · coppie';
     box.innerHTML = `<table class="xt"><tr><th>Pos</th><th class="l">Coppia</th><th>Manche</th><th>Finale</th><th>Punti</th></tr>` +
-      (stato.cross || []).map(c => `<tr><td class="p">${c.pos}</td><td class="l"><b>${R.esc(nomeCop(c.n))}</b></td><td>${c.puntiM}</td><td>${c.puntiF ? '+' + c.puntiF : ''}</td><td class="t">${c.tot}</td></tr>`).join('') + '</table>';
+      (stato.cross || []).map(c => `<tr><td class="p">${c.pos}</td><td class="l"><b>${R.esc(copPiena(c.n))}</b></td><td>${c.puntiM}</td><td>${c.puntiF ? '+' + c.puntiF : ''}</td><td class="t">${c.tot}</td></tr>`).join('') + '</table>';
   } else {
     document.getElementById('giro').textContent = '🏍️ Cross a coppie';
     document.getElementById('clTitle').textContent = 'Manche e finale';
@@ -327,9 +331,9 @@ function disegnaCross(){
       const righe = arr.map(a => {
         const ok = !a.rit && a.sq !== 'SI', p = ok ? ++pos : '';
         const q = g !== 'F' && ok && p <= 2 ? '<span class="q">FINALE</span>' : '';
-        return `<div class="xr ${ok ? '' : 'dsq'}"><span class="p">${p}</span><b>${R.esc(nomeCop(a.c))}</b>${q || (a.rit ? '<small>rit.</small>' : '')}</div>`;
+        return `<div class="xr ${ok ? '' : 'dsq'}"><span class="p">${p}</span><b>${R.esc(copPiena(a.c))}</b>${q || (a.rit ? '<small>rit.</small>' : '')}</div>`;
       }).join('');
-      const attesa = coppie.filter(c => !dentro.has(c.n)).map(c => nomeCop(c.n)).sort((a, b) => a.localeCompare(b, 'it'))
+      const attesa = coppie.filter(c => !dentro.has(c.n)).map(c => copPiena(c.n)).sort((a, b) => a.localeCompare(b, 'it'))
         .map(n => `<div class="xr wait"><span></span><span>${R.esc(n)}</span><span></span></div>`).join('');
       return `<div class="xb ${cls}"><h3>${titolo}</h3>${righe}${attesa || (righe ? '' : '<div class="xr wait"><span></span><span>in attesa…</span><span></span></div>')}</div>`;
     };
@@ -339,7 +343,7 @@ function disegnaCross(){
   }
   document.getElementById('best').innerHTML = [1,2,3].map(n => {
     const b = R.classificaGiro(stato, n)[0];
-    return `<div class="g"><span class="l">Giro ${n}</span><span class="n">${b ? R.esc(nome(b.p)) : '<span style="color:#475569">–</span>'}</span><span class="v">${b ? R.fmt(b.v) : ''}</span></div>`;
+    return `<div class="g"><span class="l">Giro ${n}</span><span class="n">${b ? R.esc(pieno(b.p)) : '<span style="color:#475569">–</span>'}</span><span class="v">${b ? R.fmt(b.v) : ''}</span></div>`;
   }).join('');
 }
 
