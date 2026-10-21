@@ -63,14 +63,18 @@ const R = {
       const t = stato.tempi[p.num] || [null, null, null];
       const giri = t.filter(R.ok).length;
       const somma = t.filter(R.ok).reduce((a, b) => a + b, 0);
-      return { p, t, giri, somma, rit: t.includes('RIT') };
+      const ok = t.filter(R.ok);
+      return { p, t, giri, somma: Math.round(somma * 100) / 100, rit: t.includes('RIT'),
+               best: ok.length ? Math.min(...ok) : Infinity, ultimo: R.ok(t[2]) ? t[2] : Infinity };
     });
-    righe.sort((a, b) => (a.rit - b.rit) || (b.giri - a.giri) || (a.somma - b.somma) || (a.p.ordine - b.p.ordine));
+    // a parità di tempo: miglior giro singolo, poi giro 3 (regola B)
+    const meglio = (a, b) => (a.somma - b.somma) || (a.best - b.best) || (a.ultimo - b.ultimo);
+    righe.sort((a, b) => (a.rit - b.rit) || (b.giri - a.giri) || meglio(a, b) || (a.p.ordine - b.p.ordine));
     // posizione e distacco calcolati tra chi ha fatto lo stesso numero di giri
     righe.forEach((r, i) => {
       if (r.giri === 0 || r.rit) { r.pos = null; r.distacco = null; return; }
       const gruppo = righe.filter(x => x.giri === r.giri && !x.rit);
-      r.pos = 1 + gruppo.filter(x => x.somma < r.somma).length;
+      r.pos = 1 + gruppo.filter(x => meglio(x, r) < 0).length;
       r.punti = r.giri === 3 ? (PUNTI[r.pos - 1] || 0) : null;
       r.distacco = r.pos > 1 ? r.somma - gruppo[0].somma : null;
     });
@@ -81,7 +85,9 @@ const R = {
   classificaGiro(stato, g) {
     return stato.piloti.filter(p => p.presente)
       .map(p => ({ p, v: (stato.tempi[p.num] || [])[g - 1] }))
-      .filter(x => R.ok(x.v)).sort((a, b) => a.v - b.v);
+      .filter(x => R.ok(x.v))
+      .map(x => { const t = stato.tempi[x.p.num] || []; x.cum = t.slice(0, g).filter(R.ok).reduce((a, b) => a + b, 0); return x; })
+      .sort((a, b) => (a.v - b.v) || (a.cum - b.cum));   // a pari tempo del giro, davanti chi ha il totale migliore
   },
 
   // ritirato in un giro precedente: non va più cronometrato
@@ -103,6 +109,17 @@ const R = {
     for (let i = 0; i < Math.floor(n / 2); i++) out.push([ord[i], ord[n - 1 - i]]);
     if (n % 2) out.push([ord[Math.floor(n / 2)], null]);
     return out;
+  },
+
+  // vincitore del cross: a punti (tradizione) oppure chi vince la finale, come scelto in regia
+  vincitoreCross(stato) {
+    const fin = ((stato.arrivi || {}).F || []).filter(a => !a.rit && a.sq !== 'SI' && (stato.qualificati || []).includes(a.c));
+    const aPunti = (stato.cross || [])[0] ? stato.cross[0].n : null, finale = fin[0] ? fin[0].c : null;
+    return { premiata: stato.premioCross === 'finale' ? (finale || aPunti) : aPunti, aPunti, finale, regola: stato.premioCross || 'punti' };
+  },
+  nomeCoppia(stato, n) {
+    const c = (stato.coppie || []).find(x => x.n === n), nm = k => (stato.piloti.find(p => p.num === k) || {}).nome || k;
+    return c ? nm(c.a) + (c.b ? ' – ' + nm(c.b) : ' (Marathon)') : '?';
   },
 
   esc: s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])),

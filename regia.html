@@ -6,6 +6,7 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Ronco 2026 · Regia</title>
 <link rel="stylesheet" href="ronco.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Inter:wght@400;600;700;800&display=swap">
 <style>
   .tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 12px; position: sticky; top: 46px; z-index: 4; background: #f0f4f8; padding: 6px 0; }
   .tabs button { padding: 9px 0; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #fff; font-size: 12px; font-weight: 700; color: #334155; }
@@ -57,6 +58,8 @@
 </div>
 
 <script src="ronco.js"></script>
+<script src="pdf.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 let pin = R.getPin('regia'), stato = null, vista = 'piloti';
 let bozza = null;                     // modifiche piloti non ancora salvate
@@ -64,7 +67,7 @@ const CKEY = 'ronco26_coppie_corrette';
 let corr = (() => { try { return JSON.parse(localStorage.getItem(CKEY)) || {}; } catch(e){ return {}; } })();
 
 function tab(v){ vista = v; disegna(); }
-const nome = p => p ? (p.sopr || p.nome) : '';
+const nome = p => p ? p.nome : '';   // nome e cognome per intero, anche su WhatsApp
 
 function disegna(){
   ['piloti','gara','coppie','cross','pubblica'].forEach(v => document.getElementById('t-'+v).classList.toggle('on', v === vista));
@@ -93,7 +96,7 @@ function vPiloti(){
     <h2 class="sec">Aggiungi pilota</h2>
     <div class="add"><input id="an" inputmode="numeric" placeholder="N°"><input id="anm" placeholder="Nome e cognome"><input id="as" placeholder="Soprannome"></div>
     <button class="btn ghost" style="width:100%;margin-top:8px" onclick="aggiungi()">+ Aggiungi in fondo</button>
-    <div class="row2"><button class="btn ghost" onclick="bozza=null;disegna()">Annulla modifiche</button><button class="btn" onclick="salvaPiloti()">💾 Salva sul foglio</button></div>`;
+    <div class="row2"><button class="btn ghost" onclick="bozza=null;disegna()">Annulla modifiche</button><button class="btn att" onclick="salvaPiloti()">💾 Salva sul foglio</button></div>`;
 }
 function copiaBozza(){ if (!bozza) bozza = stato.piloti.slice().sort((a,b) => a.ordine - b.ordine).map(p => ({...p})); }
 function muovi(i, d){ copiaBozza(); const j = i + d; if (j < 0 || j >= bozza.length) return; [bozza[i], bozza[j]] = [bozza[j], bozza[i]]; disegna(); }
@@ -109,9 +112,9 @@ async function salvaPiloti(){
   if (!bozza) return R.toast('Niente da salvare');
   try {
     const r = await R.scrivi({a: 'piloti', pin, piloti: bozza});
-    if (!r.ok) return alert('Errore: ' + r.errore);
+    if (!r.ok) { alert('Errore: ' + r.errore); return disegna(); }
     stato = r; bozza = null; R.toast('Piloti salvati'); disegna();
-  } catch(e){ alert('Nessuna connessione: riprova'); }
+  } catch(e){ alert('Nessuna connessione: riprova'); disegna(); }
 }
 
 // ---------- GARA: classifica completa con tutti i giri
@@ -127,9 +130,9 @@ function vGara(){
 }
 async function svela(cosa, v){
   const nomi = {enduro: 'la classifica enduro', cross: 'la classifica cross', assoluta: "l'assoluta"};
-  if (v && !confirm(`Svelare ${nomi[cosa]} sul tabellone?`)) return;
-  try { const r = await R.scrivi({a: 'svela', pin, cosa, val: v}); if (!r.ok) return alert('Errore: ' + r.errore); stato = r; disegna(); R.toast(v ? 'Svelata' : 'Nascosta'); }
-  catch(e){ alert('Nessuna connessione: riprova'); }
+  if (v && !confirm(`Svelare ${nomi[cosa]} sul tabellone?`)) return disegna();
+  try { const r = await R.scrivi({a: 'svela', pin, cosa, val: v}); if (!r.ok) { alert('Errore: ' + r.errore); return disegna(); } stato = r; disegna(); R.toast(v ? 'Svelata' : 'Nascosta'); }
+  catch(e){ alert('Nessuna connessione: riprova'); disegna(); }
 }
 
 // ---------- COPPIE: proposta automatica, correzioni, invio su WhatsApp
@@ -192,7 +195,7 @@ function vCoppie(){
       <select onchange="correggi(${i+1},0,this.value)">${opt(c[0])}</select>
       <select onchange="correggi(${i+1},1,this.value)">${opt(c[1], true)}</select></div>`).join('')}
     <div class="row2"><button class="btn ghost" onclick="corr={};salvaCorr();disegna()">↺ Proposta automatica</button>
-      <button class="btn" ${uguali && conf.length ? 'disabled' : ''} onclick="confermaCoppie(${arrivi})">✅ Conferma coppie</button></div>
+      <button class="btn att" ${uguali && conf.length ? 'disabled' : ''} onclick="confermaCoppie(${arrivi})">✅ Conferma coppie</button></div>
     <p class="note">Nel messaggio le coppie sono divise per manche e, dentro la manche, in <b>ordine alfabetico</b>: non si capisce chi ha vinto l'enduro.</p>
     <label class="sw"><input type="checkbox" id="conCl" onchange="anteprima()"> Aggiungi la classifica enduro (svela il vincitore!)</label>
     <textarea id="txt"></textarea>
@@ -200,11 +203,11 @@ function vCoppie(){
   anteprima();
 }
 async function confermaCoppie(arrivi){
-  if (arrivi && !confirm('Ci sono già arrivi del cross registrati. Cambiare le coppie?')) return;
+  if (arrivi && !confirm('Ci sono già arrivi del cross registrati. Cambiare le coppie?')) return disegna();
   const cp = coppieProposte();
   const lista = cp.map((c, i) => ({a: c[0].num, b: c[1] ? c[1].num : null, manche: manche(i, cp)}));
-  try { const r = await R.scrivi({a: 'coppie', pin, coppie: lista}); if (!r.ok) return alert('Errore: ' + r.errore); stato = r; R.toast('Coppie confermate'); disegna(); }
-  catch(e){ alert('Nessuna connessione: riprova'); }
+  try { const r = await R.scrivi({a: 'coppie', pin, coppie: lista}); if (!r.ok) { alert('Errore: ' + r.errore); return disegna(); } stato = r; R.toast('Coppie confermate'); disegna(); }
+  catch(e){ alert('Nessuna connessione: riprova'); disegna(); }
 }
 function correggi(i, lato, v){
   const c = coppieFinali()[i-1];
@@ -234,7 +237,7 @@ function vCross(){
       const pt = g === 'F' ? (valida ? '+' + c.puntiF : 0) : (valida ? c.puntiM : 0);
       return `<div style="display:grid;grid-template-columns:26px 1fr auto;gap:6px;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9">
         <b style="color:#0284c7">${p}</b><span>${R.esc(nomeC(a.c))}${a.rit ? ' <small>(ritirata)</small>' : ''}${a.sq === 'SI' ? ' <small style="color:#b91c1c">squalificata</small>' : ''}
-        ${a.err ? `<br><small style="color:#92400e">⚠️ errore cambio segnalato</small> <button class="btn ghost" style="padding:4px 8px;font-size:12px" onclick="squalifica('${g}',${a.c},${a.sq !== 'SI'})">${a.sq === 'SI' ? 'Annulla squalifica' : 'Squalifica'}</button>${a.sq !== 'SI' && a.sq !== 'NO' ? ` <button class="btn ghost" style="padding:4px 8px;font-size:12px" onclick="squalifica('${g}',${a.c},false)">Ignora</button>` : ''}` : ''}</span>
+        ${a.err ? `<br><small style="color:#92400e">⚠️ errore cambio segnalato</small> <button class="btn ghost att" style="padding:4px 8px;font-size:12px" onclick="squalifica('${g}',${a.c},${a.sq !== 'SI'})">${a.sq === 'SI' ? 'Annulla squalifica' : 'Squalifica'}</button>${a.sq !== 'SI' && a.sq !== 'NO' ? ` <button class="btn ghost att" style="padding:4px 8px;font-size:12px" onclick="squalifica('${g}',${a.c},false)">Ignora</button>` : ''}` : ''}</span>
         <b>${pt} pt</b></div>`; }).join('') : '<p class="note">Nessun arrivo confermato.</p>'}</div>`;
   }).join('');
   const pres = stato.piloti.filter(p => p.presente).sort((a, b) => a.num - b.num);
@@ -250,31 +253,33 @@ function vCross(){
     <div class="card" style="padding:4px 10px">${pres.map(p => { const v = (stato.penalita || {})[p.num] || 0; return `
       <div style="display:grid;grid-template-columns:40px 1fr 40px 50px 40px;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9">
         <b style="color:#0284c7">${p.num}</b><span>${R.esc(nome(p))}</span>
-        <button class="btn ghost" style="padding:6px" onclick="penalita(${p.num},${v - 3})" ${v ? '' : 'disabled'}>−</button>
+        <button class="btn ghost att" style="padding:6px" onclick="penalita(${p.num},${v - 3})" ${v ? '' : 'disabled'}>−</button>
         <b style="text-align:center;color:${v ? '#b91c1c' : '#94a3b8'}">${v ? '−' + v : '0'}</b>
-        <button class="btn ghost" style="padding:6px" onclick="penalita(${p.num},${v + 3})">+</button></div>`; }).join('')}</div>
+        <button class="btn ghost att" style="padding:6px" onclick="penalita(${p.num},${v + 3})">+</button></div>`; }).join('')}</div>
     <h2 class="sec">Assoluta</h2>
     <table><tr><th>Pos</th><th style="text-align:left">Pilota</th><th>End.</th><th>Cross</th><th>Pen.</th><th>Tot</th></tr>
     ${(stato.assoluta || []).map(r => `<tr><td><b>${r.pos}</b></td><td class="l">${R.esc(nome(P(r.num)))}</td><td>${r.enduro}</td><td>${r.cross}</td><td>${r.pen ? '−' + r.pen : ''}</td><td><b>${r.tot}</b></td></tr>`).join('')}</table>`;
 }
 async function squalifica(gara, c, val){
-  try { const r = await R.scrivi({a: 'squalifica', pin, gara, c, val}); if (!r.ok) return alert('Errore: ' + r.errore); stato = r; disegna(); }
-  catch(e){ alert('Nessuna connessione: riprova'); }
+  try { const r = await R.scrivi({a: 'squalifica', pin, gara, c, val}); if (!r.ok) { alert('Errore: ' + r.errore); return disegna(); } stato = r; disegna(); }
+  catch(e){ alert('Nessuna connessione: riprova'); disegna(); }
 }
 async function penalita(num, punti){
-  try { const r = await R.scrivi({a: 'penalita', pin, num, punti: Math.max(0, punti)}); if (!r.ok) return alert('Errore: ' + r.errore); stato = r; disegna(); }
-  catch(e){ alert('Nessuna connessione: riprova'); }
+  try { const r = await R.scrivi({a: 'penalita', pin, num, punti: Math.max(0, punti)}); if (!r.ok) { alert('Errore: ' + r.errore); return disegna(); } stato = r; disegna(); }
+  catch(e){ alert('Nessuna connessione: riprova'); disegna(); }
 }
 
 // ---------- PUBBLICA: svela sul tabellone e messaggi WhatsApp
 function testi(){
   const end = R.classifica(stato).filter(r => r.pos && r.giri === 3);
   const t = {};
-  t.enduro = '⏱️ *TROFEO RONCO 2026 · Classifica enduro*\n\n' + end.map(r => `${r.pos}. ${nome(r.p)} · ${R.fmt(r.somma)} · ${r.punti} pt`).join('\n');
+  t.enduro = '⏱️ *TROFEO RONCO 2026 · Classifica enduro*\n\n' + end.map(r => `${r.pos}. ${nome(r.p)}\n     ${r.t.map(R.fmt).join(' · ')} = *${R.fmt(r.somma)}* · ${r.punti} pt`).join('\n');
   t.coppie = testoWA();
   t.cross = '🏍️ *TROFEO RONCO 2026 · Classifica cross*\n\n' + (stato.cross || []).map(c => `${c.pos}. ${nomeC(c.n)} · ${c.tot} pt`).join('\n');
-  const fin = ((stato.arrivi || {}).F || []).filter(a => !a.rit && a.sq !== 'SI');
+  const fin = ((stato.arrivi || {}).F || []).filter(a => !a.rit && a.sq !== 'SI' && (stato.qualificati || []).includes(a.c));
   if (fin.length) t.cross += '\n\n🏁 *Finale*\n' + fin.map((a, i) => `${i + 1}. ${nomeC(a.c)}`).join('\n');
+  const vc = R.vincitoreCross(stato);
+  if (vc.premiata) t.cross += `\n\n🏆 *Vince il cross:* ${nomeC(vc.premiata)}` + (vc.regola === 'finale' ? ' (vincitore della finale)' : '');
   t.assoluta = '🏆 *TROFEO RONCO 2026 · Classifica assoluta*\n\n' + (stato.assoluta || []).map(r => `${r.pos}. ${nome(P(r.num))} · ${r.tot} pt`).join('\n') + '\n\nGrazie a tutti, alla prossima! 💪';
   return t;
 }
@@ -284,16 +289,36 @@ function vPubblica(){
     <h2 class="sec">${titolo}</h2>
     <div class="card">
       <p class="note" style="margin-top:0">${nota}</p>
+      ${k === 'cross' ? `<div class="row2" style="margin:0 0 10px"><button class="btn ${stato.premioCross !== 'finale' ? '' : 'ghost'} att" onclick="premio('punti')">🏆 Premio a punti</button><button class="btn ${stato.premioCross === 'finale' ? '' : 'ghost'} att" onclick="premio('finale')">🏁 Premio a chi vince la finale</button></div>` : ''}
       ${conSvela ? (sv[k]
-        ? `<button class="btn ghost" style="width:100%" onclick="svela('${k}',false)">🔒 Nascondi dal tabellone</button><p class="note" style="color:#166534;font-weight:700">✓ Visibile sul tabellone</p>`
-        : `<button class="btn" style="width:100%;background:#ca8a04" onclick="svela('${k}',true)">🏆 Svela sul tabellone</button>`) : ''}
-      <div class="row2"><button class="btn ghost" onclick="copiaT('${k}')">📋 Copia</button><button class="btn wa" onclick="condividi('${k}')">WhatsApp</button></div>
+        ? `<button class="btn ghost att" style="width:100%" onclick="svela('${k}',false)">🔒 Nascondi dal tabellone</button><p class="note" style="color:#166534;font-weight:700">✓ Visibile sul tabellone</p>`
+        : `<button class="btn att" style="width:100%;background:#ca8a04" onclick="svela('${k}',true)">🏆 Svela sul tabellone</button>`) : ''}
+      <div class="row2" style="grid-template-columns:${k === 'coppie' ? '1fr 1fr' : '1fr 1fr 1fr'}"><button class="btn ghost" onclick="copiaT('${k}')">📋 Copia</button>${k === 'coppie' ? '' : `<button class="btn ghost" onclick="faiPdf('${k}', this)">📄 PDF</button>`}<button class="btn wa" onclick="condividi('${k}')">WhatsApp</button></div>
     </div>`;
   document.getElementById('view').innerHTML =
     blocco('enduro', '1 · Classifica enduro', 'Al giro 3 e a crono chiuso il tabellone nasconde totale e punti. Svela quando vuoi: lo speaker annuncia il vincitore.', true) +
     blocco('coppie', '2 · Coppie per WhatsApp', 'Divise per manche, in ordine alfabetico: non svelano la classifica. Prima confermale nella scheda 🤝 Coppie.', false) +
-    blocco('cross', '3 · Classifica cross', 'Punti delle manche più punti extra della finale, per coppia.', true) +
+    blocco('cross', '3 · Classifica cross', 'Punti delle manche più punti extra della finale, per coppia. Scegli a chi va il premio cross.', true) +
     blocco('assoluta', '4 · Assoluta', 'Punti enduro + punti cross della coppia − penalità. A parità vince il miglior tempo enduro.', true);
+}
+async function premio(val){
+  try { const r = await R.scrivi({a: 'premio', pin, val}); if (!r.ok) return alert('Errore: ' + r.errore); stato = r; disegna(); }
+  catch(e){ alert('Nessuna connessione: riprova'); disegna(); }
+}
+// PDF pulito della classifica: si condivide su WhatsApp come allegato
+async function faiPdf(k, b){
+  const t = b.textContent; b.disabled = true; b.textContent = '⏳';
+  // piano B: pagina pronta da stampare o «salvare come PDF» dal telefono
+  const stampa = () => {
+    const w = window.open('', '_blank');
+    w.document.write(`<html><head><title>Trofeo Ronco 2026</title><base href="${location.href}"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Inter:wght@400;600;700;800&display=swap"><style>@page{size:A4;margin:0}body{margin:0}</style></head><body>${PDF.pagina(k, stato)}</body></html>`);
+    w.document.close(); setTimeout(() => w.print(), 900);
+  };
+  try {
+    if (typeof html2pdf === 'undefined') stampa();
+    else await PDF.condividi(k, stato);
+  } catch(e){ if (e.name !== 'AbortError') stampa(); }
+  finally { b.disabled = false; b.textContent = t; }
 }
 function copiaT(k){ navigator.clipboard.writeText(testi()[k]).then(() => R.toast('Copiato'), () => R.toast('Copia non riuscita')); }
 function condividi(k){
@@ -301,6 +326,11 @@ function condividi(k){
   if (navigator.share) navigator.share({text: t}).catch(() => {});
   else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank');
 }
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('button.att');
+  if (b && !b.disabled) setTimeout(() => { if (b.isConnected) { b.disabled = true; b.textContent = '⏳'; } }, 0);
+}, true);
 
 function esci(){ if (confirm('Uscire dalla regia?')) { R.setPin('regia',''); location.reload(); } }
 

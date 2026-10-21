@@ -40,7 +40,7 @@
   .modo { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; background: #e2e8f0; padding: 4px; border-radius: 12px; }
   .modo button { padding: 10px 0; border: none; border-radius: 9px; background: transparent; font-size: 15px; font-weight: 800; color: #475569; }
   .modo button.on { background: #0f172a; color: #fff; }
-  .arr { display: grid; grid-template-columns: 34px 1fr auto auto auto; gap: 6px; align-items: center; padding: 9px 4px; border-bottom: 1px solid #f1f5f9; }
+  .arr { display: grid; grid-template-columns: 30px 1fr auto auto auto; gap: 6px; align-items: center; padding: 9px 4px; border-bottom: 1px solid #f1f5f9; }
   .arr .p { font-size: 20px; font-weight: 900; color: #0284c7; text-align: center; }
   .arr .n { font-size: 16px; font-weight: 700; }
   .arr .n small { display: block; font-size: 11px; color: #64748b; font-weight: 500; }
@@ -177,7 +177,7 @@ function disegna(){
 const BKEY = 'ronco26_bozza_arrivi';
 let gara = 'M1', bozza = (() => { try { return JSON.parse(localStorage.getItem(BKEY)) || {}; } catch(e){ return {}; } })();
 const salvaBozza = () => { try { localStorage.setItem(BKEY, JSON.stringify(bozza)); } catch(e){} };
-const sopr = n => { const p = server.piloti.find(x => x.num === n); return p ? (p.sopr || p.nome) : n; };
+const sopr = n => { const p = server.piloti.find(x => x.num === n); return p ? p.nome : n; };   // nome e cognome per intero
 const nomeC = c => c ? sopr(c.a) + (c.b ? ' – ' + sopr(c.b) : ' 🏃 Marathon') : '?';
 const coppia = n => (server.coppie || []).find(c => c.n === n);
 function coppieGara(g){
@@ -209,7 +209,7 @@ function disegnaCross(){
     return `<div class="arr ${x.rit ? 'rit' : ''}"><span class="p">${p}</span>
       <span class="n">${R.esc(nomeC(c))}<small>Coppia ${x.c}${x.rit ? ' · ritirata' : ''}</small></span>
       ${x.rit ? '<span></span>' : `<button class="${x.err ? 'err' : ''}" onclick="errore(${i})">${x.err ? '⚠️ Errore cambio' : 'Cambio ok'}</button>`}
-      <button onclick="su(${i})" ${i ? '' : 'disabled'}>▲</button><button onclick="togli(${i})">✕</button></div>`;
+      <span><button onclick="su(${i})" ${i ? '' : 'disabled'}>▲</button><button onclick="giu(${i})" ${i < l.length - 1 ? '' : 'disabled'}>▼</button></span><button onclick="togli(${i})">✕</button></div>`;
   }).join('');
   el.innerHTML = `
     <div class="tabs">${tabs}</div>
@@ -220,7 +220,7 @@ function disegnaCross(){
       <div class="stato ${salvato && l.length ? 'ok' : 'todo'}">${salvato && l.length ? '✓ Salvato sul foglio' : (l.length ? 'Da confermare' : '')}</div>
       <div class="actions" style="grid-template-columns:1fr 2fr">
         <button class="btn ghost" onclick="ricomincia()">↺ Annulla</button>
-        <button class="btn green" ${l.length && !salvato ? '' : 'disabled'} onclick="confermaArrivi()">✔ Conferma arrivi</button>
+        <button class="btn green" id="bConf" ${l.length && !salvato ? '' : 'disabled'} onclick="confermaArrivi()">✔ Conferma arrivi</button>
       </div>
     </div>
     <h2 class="sec">${restanti.length ? 'Tocca la coppia quando arriva' : 'Tutte le coppie sono in lista'}</h2>
@@ -234,18 +234,21 @@ function arriva(n){ modifica(l => l.push({c: n, err: false, rit: false})); }
 function ritira(n){ modifica(l => l.push({c: n, err: false, rit: true})); }
 function errore(i){ modifica(l => l[i].err = !l[i].err); }
 function su(i){ modifica(l => { if (i > 0) [l[i-1], l[i]] = [l[i], l[i-1]]; }); }
+function giu(i){ modifica(l => { if (i < l.length - 1) [l[i+1], l[i]] = [l[i], l[i+1]]; }); }
 function togli(i){ modifica(l => l.splice(i, 1)); }
 function ricomincia(){ if (bozza[gara] && !confirm('Annullare le modifiche non confermate?')) return; delete bozza[gara]; salvaBozza(); disegna(); }
 async function confermaArrivi(){
   const l = lista(gara);
   const tot = coppieGara(gara).length;
   if (l.length < tot && !confirm(`Mancano ${tot - l.length} coppie. Confermare lo stesso?`)) return;
+  const b = document.getElementById('bConf');
+  if (b) { b.disabled = true; b.textContent = '⏳ Salvataggio…'; }   // risposta immediata, niente doppi tocchi
   try {
     const r = await R.scrivi({a: 'arrivi', pin, gara, lista: l});
-    if (!r.ok) return alert('Errore: ' + r.errore);
+    if (!r.ok) { alert('Errore: ' + r.errore); return disegna(); }
     server = r; delete bozza[gara]; salvaBozza();
     R.toast('✔ Arrivi salvati'); disegna();
-  } catch(e){ alert('Nessuna connessione: gli arrivi restano qui, riprova tra poco.'); }
+  } catch(e){ alert('Nessuna connessione: gli arrivi restano qui, riprova tra poco.'); disegna(); }
 }
 
 // ---------- azioni

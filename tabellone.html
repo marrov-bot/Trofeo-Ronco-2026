@@ -14,6 +14,10 @@
   .top .t1 { font-size: 22px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
   .top .t2 { font-size: 12px; opacity: .85; }
   .top .giro { font-size: 22px; font-weight: 800; background: rgba(255,255,255,.18); padding: 6px 16px; border-radius: 999px; }
+  .top .nav { display: flex; gap: 6px; }
+  .top .nav button { border: 1.5px solid rgba(255,255,255,.55); background: transparent; color: #fff; font-size: 14px; font-weight: 800; padding: 6px 12px; border-radius: 999px; }
+  .top .nav button.on { background: #fff; color: #0369a1; border-color: #fff; }
+  .top .nav button.lk { opacity: .45; }
   .top .clock { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
   .main { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; padding: 10px 12px; height: calc(100vh - 60px - 42px); }
   .panel { background: #111a2e; border: 1px solid #1e293b; border-radius: 14px; padding: 8px 10px; overflow: hidden; display: flex; flex-direction: column; }
@@ -49,6 +53,7 @@
   .xt td, .xt th { padding: 3px 6px; border-bottom: 1px solid #1e293b; text-align: right; font-variant-numeric: tabular-nums; }
   .xt th { font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 600; background: none; }
   .xt td.l, .xt th.l { text-align: left; } .xt td.p { color: #facc15; font-weight: 900; text-align: center; } .xt td.t { color: #fff; font-weight: 900; }
+  .cl .lockbar { margin: 0 0 6px; padding: 7px 10px; border-radius: 10px; background: rgba(250,204,21,.12); border: 1.5px solid #ca8a04; color: #facc15; font-weight: 800; font-size: 15px; text-align: center; }
   .cl .lock { margin: 14px 4px 6px; padding: 12px; border: 2px dashed #ca8a04; border-radius: 12px; text-align: center; color: #facc15; font-weight: 900; font-size: 20px; }
   .cl .lock small { font-size: 13px; color: #fde68a; font-weight: 600; }
   .cl .r.wait .sec::after { content: '…'; color: #475569; }
@@ -75,6 +80,7 @@
   .ticker .run { display: inline-block; padding-left: 100%; animation: run 120s linear infinite; font-size: 17px; color: #e2e8f0; }
   @keyframes run { from { transform: translateX(0); } to { transform: translateX(-100%); } }
   .off { position: fixed; top: 66px; right: 22px; background: #dc2626; color: #fff; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; display: none; }
+  @media (max-width: 1150px) { .top .t2 { display: none; } .top .t1 { font-size: 18px; } .top .giro { font-size: 17px; padding: 5px 12px; } .top .nav button { font-size: 12px; padding: 5px 9px; } .top .clock { font-size: 20px; } }
   @media (max-width: 820px) { body { overflow: auto; height: auto; } .main { grid-template-columns: 1fr; height: auto; } .top .t2, .top .clock { display: none; } .cl .r { grid-template-columns: 26px 36px 1fr 64px 56px 0 0; } .cl .ctot, .cl .cpos { display: none; } }
 </style>
 </head>
@@ -82,6 +88,7 @@
 <div class="top">
   <div><div class="t1">Trofeo Ronco 2026</div><div class="t2">7ª edizione · prova a cronometro</div></div>
   <div class="giro" id="giro">Giro 1</div>
+  <div class="nav" id="nav"></div>
   <div class="clock" id="clock"></div>
 </div>
 <div class="off" id="off">Connessione assente</div>
@@ -240,117 +247,171 @@ function novita(nuovo){
   const giroOra = R.giroInCorso(nuovo);
   if (giroOra > giroPrima) commentaFineGiro(giroOra - 1);
   const sv = nuovo.svela || {}, svP = prima.svela || {};
+  // un evento nuovo (svela, coppie, arrivi) annulla la scelta fatta col tap: si vede subito la novità
+  if (nuovo.ultimo !== prima.ultimo || JSON.stringify(sv) !== JSON.stringify(svP) || JSON.stringify(nuovo.arrivi) !== JSON.stringify(prima.arrivi)) scelta = null;
   if (sv.enduro && !svP.enduro && giroOra > 3) annunciaVincitore();
   commentaCross(prima, nuovo);
   visti = JSON.parse(JSON.stringify(nuovo.tempi));
 }
 
-// ---------- disegno
-function disegna(){
-  const g = R.giroInCorso(stato);
-  const svelata = !!(stato.svela || {}).enduro;
-  if (faseCross()) return disegnaCross();
-  document.getElementById('giro').textContent = g > 3 ? (svelata ? '🏁 Classifica finale' : '🔒 Crono chiuso') : `Giro ${g} in corso`;
-  document.getElementById('clTitle').textContent = g > 3 ? (svelata ? 'Classifica enduro' : 'Classifica alla premiazione…') : (g === 3 ? 'Giro 3 · solo tempi del giro' : 'Classifica provvisoria');
-  const cl = R.classifica(stato);
-  const box = document.getElementById('cl');
-  const fl = num => flash.has(num) ? 'flash' : '';
-  const T = (pos, num, nm, a, b, c, d, cls = '') => `<div class="r ${cls}"><span class="pos p${pos}">${pos || ''}</span><span class="num">${num}</span><span class="nm"><b>${nm}</b></span><span class="sec">${a}</span><span class="gap">${b}</span><span class="ctot">${c}</span><span class="cpos">${d}</span></div>`;
-  const H = (a, b, c, d) => `<div class="r h"><span>Pos</span><span>N°</span><span>Pilota</span><span style="text-align:right">${a}</span><span style="text-align:right">${b}</span><span style="text-align:right">${c}</span><span>${d}</span></div>`;
-  let html = '';
-  const mostraTot = g === 2;   // il totale si vede solo durante il giro 2
-  if (g <= 3 || !svelata) {
-    const gg = Math.min(g, 3);
-    // 1) chi ha già fatto il giro g: classifica sul TEMPO SECCO del giro
-    const giro = R.classificaGiro(stato, gg);
-    const best = giro[0];
-    const cum = num => cl.find(r => r.p.num === num) || {};
-    html += H(`Giro ${gg}`, 'Distacco', mostraTot ? 'Totale' : '', mostraTot ? 'Cl.' : '');
-    if (giro.length) html += `<div class="grp">Classifica del giro ${gg}</div>`;
-    giro.forEach((x, i) => {
-      const c = cum(x.p.num);
-      html += T(i + 1, x.p.num, R.esc(pieno(x.p)), R.fmt(x.v), i ? R.gap(x.v - best.v) : '',
-               mostraTot ? R.fmt(c.somma) : '', mostraTot && c.pos ? c.pos + '°' : '', fl(x.p.num));
-    });
-    // 2) chi deve ancora passare: totale dopo il giro precedente
-    const attesa = cl.filter(r => !r.rit && (stato.tempi[r.p.num] || [])[gg - 1] == null);
-    if (attesa.length) {
-      html += `<div class="grp">Devono ancora passare${mostraTot ? ' · totale dopo 1 giro' : ''}</div>`;
-      const ord = mostraTot ? attesa : attesa.sort((a, b) => a.p.ordine - b.p.ordine);
-      ord.forEach(r => { html += T('', r.p.num, R.esc(pieno(r.p)), '', '', mostraTot && r.giri ? R.fmt(r.somma) : '', mostraTot && r.pos ? r.pos + '°' : '', 'wait'); });
-    }
-  } else {
-    // crono finito: classifica finale sul totale, con punti
-    html += H('Totale', 'Distacco', 'Giro 3', 'Pt');
-    cl.filter(r => !r.rit).forEach(r => { html += T(r.pos, r.p.num, R.esc(pieno(r.p)), R.fmt(r.somma), r.distacco != null ? R.gap(r.distacco) : '', R.fmt(r.t[2]), r.punti ?? '', fl(r.p.num)); });
-  }
-  if (g > 3 && !svelata) html += `<div class="lock">🔒 Classifica finale e punti<br><small>alla premiazione</small></div>`;
-  const rit = cl.filter(r => r.rit);
-  if (rit.length) { html += `<div class="grp">Ritirati</div>`; rit.forEach(r => { html += T('', r.p.num, R.esc(pieno(r.p)), 'Rit.', '', '', '', 'rit'); }); }
-  box.innerHTML = html;
-  // altezza righe: tutta la classifica deve stare nello schermo
-  const nRighe = box.querySelectorAll('.r:not(.h)').length, nGrp = box.querySelectorAll('.grp').length;
-  if (innerWidth > 820) box.style.setProperty('--rh', Math.max(26, Math.min(64, Math.floor((box.clientHeight - 20 - nGrp * 20 - (box.querySelector('.lock') ? 125 : 0)) / Math.max(nRighe, 1)))) + 'px');
-  setTimeout(() => { flash.clear(); document.querySelectorAll('.r.flash').forEach(e => e.classList.remove('flash')); }, 4000);
+// ---------- cosa mostra il tabellone
+// Automatico: segue la gara (giro in corso, poi manche, poi l'ultima classifica svelata).
+// Con un tap sui pulsanti in alto si guarda un'altra vista per 45 secondi, poi si torna all'automatico.
+let scelta = null, sceltaFino = 0;
+function scegli(v){ scelta = v; sceltaFino = Date.now() + 45000; disegna(); }
+const haTempo = (num, g) => (stato.tempi[num] || [])[g - 1] != null;
+const presenti = () => stato.piloti.filter(p => p.presente);
+function giroVisto(){   // a giro completo resta su quel giro finché non arriva il primo tempo del successivo
+  const g0 = R.giroInCorso(stato);
+  const nessuno = g0 > 1 && g0 <= 3 && !presenti().some(p => haTempo(p.num, g0));
+  return { g0, g: nessuno ? g0 - 1 : g0, concluso: nessuno };
+}
+const giro3Partito = () => presenti().some(p => haTempo(p.num, 3));
+function opzioni(){
+  const sv = stato.svela || {}, o = [], blocco = giro3Partito() && !sv.enduro;
+  [1, 2, 3].forEach(g => { if (presenti().some(p => haTempo(p.num, g))) o.push({ k: 'g' + g, t: 'Giro ' + g, lock: blocco && g < 3 }); });
+  if (sv.enduro) o.push({ k: 'enduro', t: 'Enduro' });
+  if ((stato.coppie || []).length) o.push({ k: 'manche', t: 'Manche' });
+  if (sv.cross) o.push({ k: 'cross', t: 'Cross' });
+  if (sv.assoluta) o.push({ k: 'assoluta', t: 'Assoluta' });
+  return o;
+}
+function vistaAuto(){
+  const sv = stato.svela || {}, u = stato.ultimo || '';
+  const cross = (stato.coppie || []).length && R.giroInCorso(stato) > 3;
+  if (sv[u] && ['enduro', 'cross', 'assoluta'].includes(u)) return u;
+  if (cross) return 'manche';
+  return 'live';
+}
+function vista(){
+  if (scelta && Date.now() < sceltaFino && opzioni().some(o => o.k === scelta && !o.lock)) return scelta;
+  scelta = null; return vistaAuto();
+}
 
+// ---------- disegno
+const fl = num => flash.has(num) ? 'flash' : '';
+const T = (pos, num, nm, a, b, c, d, cls = '') => `<div class="r ${cls}"><span class="pos p${pos}">${pos || ''}</span><span class="num">${num}</span><span class="nm"><b>${nm}</b></span><span class="sec">${a}</span><span class="gap">${b}</span><span class="ctot">${c}</span><span class="cpos">${d}</span></div>`;
+const H = (a, b, c, d) => `<div class="r h"><span>Pos</span><span>N°</span><span>Pilota</span><span style="text-align:right">${a}</span><span style="text-align:right">${b}</span><span style="text-align:right">${c}</span><span>${d}</span></div>`;
+const titolo = (stato_, sotto) => { document.getElementById('giro').textContent = stato_; document.getElementById('clTitle').textContent = sotto; };
+
+function disegna(){
+  const v = vista();
+  document.getElementById('nav').innerHTML = opzioni().map(o =>
+    `<button class="${o.k === v || (v === 'live' && o.k === 'g' + giroVisto().g) ? 'on' : ''} ${o.lock ? 'lk' : ''}" ${o.lock ? 'disabled' : `onclick="scegli('${o.k}')"`}>${o.lock ? '🔒 ' : ''}${o.t}</button>`).join('');
+  const box = document.getElementById('cl');
+  box.style.removeProperty('--rh');
+  if (v === 'manche') vManche(box);
+  else if (v === 'cross') vClassCross(box);
+  else if (v === 'assoluta') vAssoluta(box);
+  else if (v === 'enduro') vEnduroFinale(box);
+  else if (v[0] === 'g') vGiro(box, +v[1], true);
+  else vLive(box);
+  setTimeout(() => { flash.clear(); document.querySelectorAll('.r.flash').forEach(e => e.classList.remove('flash')); }, 4000);
   document.getElementById('best').innerHTML = [1,2,3].map(n => {
     const b = R.classificaGiro(stato, n)[0];
     return `<div class="g"><span class="l">Giro ${n}</span><span class="n">${b ? R.esc(pieno(b.p)) : '<span style="color:#475569">–</span>'}</span><span class="v">${b ? R.fmt(b.v) : ''}</span></div>`;
   }).join('');
+}
+
+// righe tutte dentro lo schermo
+function adatta(box){
+  const nRighe = box.querySelectorAll('.r:not(.h)').length, nGrp = box.querySelectorAll('.grp').length, extra = box.querySelector('.lockbar') ? 40 : 0;
+  if (innerWidth > 820) box.style.setProperty('--rh', Math.max(26, Math.min(64, Math.floor((box.clientHeight - 20 - nGrp * 20 - extra) / Math.max(nRighe, 1)))) + 'px');
+}
+
+// vista automatica durante il crono
+function vLive(box){
+  const { g, concluso } = giroVisto(), sv = stato.svela || {};
+  if (g > 3) {
+    if (sv.enduro) return vEnduroFinale(box);
+    titolo('🔒 Crono chiuso', 'Giro 3 · tempi del giro');
+    return vGiro(box, 3, false, true);
+  }
+  titolo(concluso ? `✅ Giro ${g} concluso` : `Giro ${g} in corso`, g === 3 ? 'Giro 3 · solo tempi del giro' : 'Classifica provvisoria');
+  vGiro(box, g, false);
+}
+
+// classifica sul tempo secco del giro gg
+function vGiro(box, gg, manuale, chiuso){
+  const sv = stato.svela || {}, cl = R.classifica(stato);
+  // il totale si vede solo nel giro 2, finché non parte il giro 3 (o dopo «Svela»)
+  const mostraTot = (gg === 2 && !giro3Partito()) || (gg >= 2 && sv.enduro);
+  if (manuale) titolo(`Giro ${gg}`, `Giro ${gg} · tempi del giro`);
+  const giro = R.classificaGiro(stato, gg), best = giro[0];
+  const cum = num => { const r = cl.find(x => x.p.num === num) || {}; const t = (stato.tempi[num] || []).slice(0, gg); return { somma: t.filter(R.ok).reduce((a, b) => a + b, 0), r }; };
+  let html = (chiuso ? '<div class="lockbar">🔒 Classifica finale e punti alla premiazione</div>' : '') + H(`Giro ${gg}`, 'Distacco', mostraTot ? 'Totale' : '', mostraTot ? 'Cl.' : '');
+  if (giro.length) html += `<div class="grp">Classifica del giro ${gg}</div>`;
+  // posizione dopo gg giri (solo se il totale è visibile)
+  const dopo = giro.map(x => ({ n: x.p.num, s: cum(x.p.num).somma })).sort((a, b) => a.s - b.s);
+  giro.forEach((x, i) => {
+    const c = cum(x.p.num), pc = dopo.findIndex(d => d.n === x.p.num) + 1;
+    html += T(i + 1, x.p.num, R.esc(pieno(x.p)), R.fmt(x.v), i ? R.gap(x.v - best.v) : '', mostraTot ? R.fmt(c.somma) : '', mostraTot ? pc + '°' : '', fl(x.p.num));
+  });
+  const attesa = cl.filter(r => !r.rit && !haTempo(r.p.num, gg));
+  if (attesa.length) {
+    const totPrima = gg === 2 && mostraTot;
+    html += `<div class="grp">Devono ancora passare${totPrima ? ' · totale dopo 1 giro' : ''}</div>`;
+    (totPrima ? attesa : attesa.sort((a, b) => a.p.ordine - b.p.ordine)).forEach(r => {
+      html += T('', r.p.num, R.esc(pieno(r.p)), '', '', totPrima && r.giri ? R.fmt(r.somma) : '', totPrima && r.pos ? r.pos + '°' : '', 'wait'); });
+  }
+  const rit = cl.filter(r => r.rit);
+  if (rit.length) { html += `<div class="grp">Ritirati</div>`; rit.forEach(r => { html += T('', r.p.num, R.esc(pieno(r.p)), 'Rit.', '', '', '', 'rit'); }); }
+  box.innerHTML = html; adatta(box);
+}
+
+function vEnduroFinale(box){
+  const cl = R.classifica(stato);
+  titolo('🏁 Classifica enduro', 'Classifica enduro');
+  let html = H('Totale', 'Distacco', 'Giro 3', 'Pt');
+  cl.filter(r => !r.rit && r.giri === 3).forEach(r => { html += T(r.pos, r.p.num, R.esc(pieno(r.p)), R.fmt(r.somma), r.distacco != null ? R.gap(r.distacco) : '', R.fmt(r.t[2]), r.punti ?? '', fl(r.p.num)); });
+  const rit = cl.filter(r => r.rit || r.giri < 3);
+  if (rit.length) { html += `<div class="grp">Ritirati</div>`; rit.forEach(r => { html += T('', r.p.num, R.esc(pieno(r.p)), 'Rit.', '', '', '', 'rit'); }); }
+  box.innerHTML = html; adatta(box);
 }
 
 // ---------- CROSS sul tabellone
-// fase cross: coppie confermate e crono chiuso, oppure classifica cross/assoluta svelata
-function faseCross(){
-  const sv = stato.svela || {};
-  return sv.assoluta || sv.cross || ((stato.coppie || []).length && R.giroInCorso(stato) > 3);
-}
 const sp = n => { const p = stato.piloti.find(x => x.num === n); return p ? nome(p) : n; };
 const nomeCop = n => { const c = (stato.coppie || []).find(x => x.n === n); return c ? sp(c.a) + (c.b ? ' – ' + sp(c.b) : ' 🏃') : '?'; };
-function disegnaCross(){
-  const sv = stato.svela || {}, box = document.getElementById('cl');
-  box.style.removeProperty('--rh');
-  if (sv.assoluta) {
-    document.getElementById('giro').textContent = '🏆 Assoluta';
-    document.getElementById('clTitle').textContent = 'Classifica assoluta 2026';
-    const fs = Math.max(14, Math.min(22, Math.floor((box.clientHeight - 30) / ((stato.assoluta || []).length + 1) * .55)));
-    box.innerHTML = `<table class="xt" style="font-size:${fs}px"><tr><th>Pos</th><th class="l">Pilota</th><th>Enduro</th><th>Cross</th><th>Pen.</th><th>Totale</th></tr>` +
-      (stato.assoluta || []).map(r => `<tr><td class="p">${r.pos}</td><td class="l"><b>${R.esc(pienoN(r.num))}</b></td><td>${r.enduro}</td><td>${r.cross}</td><td>${r.pen ? '−' + r.pen : ''}</td><td class="t">${r.tot}</td></tr>`).join('') + '</table>';
-  } else if (sv.cross) {
-    document.getElementById('giro').textContent = '🏍️ Classifica cross';
-    document.getElementById('clTitle').textContent = 'Classifica cross · coppie';
-    box.innerHTML = `<table class="xt"><tr><th>Pos</th><th class="l">Coppia</th><th>Manche</th><th>Finale</th><th>Punti</th></tr>` +
-      (stato.cross || []).map(c => `<tr><td class="p">${c.pos}</td><td class="l"><b>${R.esc(copPiena(c.n))}</b></td><td>${c.puntiM}</td><td>${c.puntiF ? '+' + c.puntiF : ''}</td><td class="t">${c.tot}</td></tr>`).join('') + '</table>';
-  } else {
-    document.getElementById('giro').textContent = '🏍️ Cross a coppie';
-    document.getElementById('clTitle').textContent = 'Manche e finale';
-    const blocco = (g, titolo, coppie, cls = '') => {
-      const arr = ((stato.arrivi || {})[g] || []);
-      const dentro = new Set(arr.map(a => a.c));
-      let pos = 0;
-      const righe = arr.map(a => {
-        const ok = !a.rit && a.sq !== 'SI', p = ok ? ++pos : '';
-        const q = g !== 'F' && ok && p <= 2 ? '<span class="q">FINALE</span>' : '';
-        return `<div class="xr ${ok ? '' : 'dsq'}"><span class="p">${p}</span><b>${R.esc(copPiena(a.c))}</b>${q || (a.rit ? '<small>rit.</small>' : '')}</div>`;
-      }).join('');
-      const attesa = coppie.filter(c => !dentro.has(c.n)).map(c => copPiena(c.n)).sort((a, b) => a.localeCompare(b, 'it'))
-        .map(n => `<div class="xr wait"><span></span><span>${R.esc(n)}</span><span></span></div>`).join('');
-      return `<div class="xb ${cls}"><h3>${titolo}</h3>${righe}${attesa || (righe ? '' : '<div class="xr wait"><span></span><span>in attesa…</span><span></span></div>')}</div>`;
-    };
-    const cp = stato.coppie || [];
-    const fin = (stato.qualificati || []).map(n => cp.find(c => c.n === n)).filter(Boolean);
-    box.innerHTML = `<div class="xg">${blocco('M1', 'Manche 1', cp.filter(c => c.manche === 1))}${blocco('M2', 'Manche 2', cp.filter(c => c.manche === 2))}${blocco('F', 'Finale', fin, 'fin')}</div>`;
-  }
-  document.getElementById('best').innerHTML = [1,2,3].map(n => {
-    const b = R.classificaGiro(stato, n)[0];
-    return `<div class="g"><span class="l">Giro ${n}</span><span class="n">${b ? R.esc(pieno(b.p)) : '<span style="color:#475569">–</span>'}</span><span class="v">${b ? R.fmt(b.v) : ''}</span></div>`;
-  }).join('');
+function vAssoluta(box){
+  titolo('🏆 Assoluta', 'Classifica assoluta 2026');
+  const fs = Math.max(14, Math.min(22, Math.floor((box.clientHeight - 30) / ((stato.assoluta || []).length + 1) * .55)));
+  box.innerHTML = `<table class="xt" style="font-size:${fs}px"><tr><th>Pos</th><th class="l">Pilota</th><th>Enduro</th><th>Cross</th><th>Pen.</th><th>Totale</th></tr>` +
+    (stato.assoluta || []).map(r => `<tr><td class="p">${r.pos}</td><td class="l"><b>${R.esc(pienoN(r.num))}</b></td><td>${r.enduro}</td><td>${r.cross}</td><td>${r.pen ? '−' + r.pen : ''}</td><td class="t">${r.tot}</td></tr>`).join('') + '</table>';
+}
+function vClassCross(box){
+  const vc = R.vincitoreCross(stato);
+  titolo('🏍️ Classifica cross', vc.regola === 'finale' ? 'Classifica cross · premio al vincitore della finale' : 'Classifica cross · coppie');
+  box.innerHTML = `<table class="xt"><tr><th>Pos</th><th class="l">Coppia</th><th>Manche</th><th>Finale</th><th>Punti</th></tr>` +
+    (stato.cross || []).map(c => `<tr><td class="p">${c.pos}</td><td class="l"><b>${R.esc(copPiena(c.n))}</b>${c.n === vc.premiata ? ' 🏆' : ''}</td><td>${c.puntiM}</td><td>${c.puntiF ? '+' + c.puntiF : ''}${c.posF === 1 ? ' 🏁' : ''}</td><td class="t">${c.tot}</td></tr>`).join('') + '</table>';
+}
+function vManche(box){
+  titolo('🏍️ Cross a coppie', 'Manche e finale');
+  const blocco = (g, tit, coppie, cls = '') => {
+    const arr = ((stato.arrivi || {})[g] || []);
+    const dentro = new Set(arr.map(a => a.c));
+    let pos = 0;
+    const righe = arr.map(a => {
+      const fuori = g === 'F' && !(stato.qualificati || []).includes(a.c);
+      const ok = !a.rit && a.sq !== 'SI' && !fuori, p = ok ? ++pos : '';
+      const q = g !== 'F' && ok && p <= 2 ? '<span class="q">FINALE</span>' : '';
+      return `<div class="xr ${ok ? '' : 'dsq'}"><span class="p">${p}</span><b>${R.esc(copPiena(a.c))}</b>${q || (a.rit ? '<small>rit.</small>' : '')}</div>`;
+    }).join('');
+    // coppie ancora da correre: in ordine alfabetico, così non si capisce la classifica enduro
+    const attesa = coppie.filter(c => !dentro.has(c.n)).map(c => copPiena(c.n)).sort((a, b) => a.localeCompare(b, 'it'))
+      .map(n => `<div class="xr wait"><span></span><span>${R.esc(n)}</span><span></span></div>`).join('');
+    return `<div class="xb ${cls}"><h3>${tit}</h3>${righe}${attesa || (righe ? '' : '<div class="xr wait"><span></span><span>in attesa…</span><span></span></div>')}</div>`;
+  };
+  const cp = stato.coppie || [];
+  const fin = (stato.qualificati || []).map(n => cp.find(c => c.n === n)).filter(Boolean);
+  box.innerHTML = `<div class="xg">${blocco('M1', 'Manche 1', cp.filter(c => c.manche === 1))}${blocco('M2', 'Manche 2', cp.filter(c => c.manche === 2))}${blocco('F', 'Finale', fin, 'fin')}</div>`;
 }
 
 // commenti dello speaker sul cross
 function commentaCross(prima, nuovo){
   const stP = stato; stato = nuovo;
   try {
+    if (!(prima.coppie || []).length && (nuovo.coppie || []).length)
+      dici(`🤝 Coppie pronte, si va al cross! Controllate la vostra manche sul tabellone e preparate maschera e visiera.`, 'oro', 'Cross');
     const A = prima.arrivi || {}, B = nuovo.arrivi || {};
     ['M1', 'M2', 'F'].forEach(g => {
       const a = JSON.stringify(A[g] || []), b = JSON.stringify(B[g] || []);
@@ -362,8 +423,13 @@ function commentaCross(prima, nuovo){
     });
     const sv = nuovo.svela || {}, svP = prima.svela || {};
     if (sv.cross && !svP.cross && (nuovo.cross || []).length) {
-      const c = nuovo.cross[0];
-      dici(`🏍️ Classifica cross: vince la coppia <b>${nomeCop(c.n)}</b> con ${c.tot} punti!`, 'oro', 'Cross');
+      const vc = R.vincitoreCross(nuovo), cP = nuovo.cross.find(c => c.n === vc.premiata) || nuovo.cross[0];
+      let t = vc.regola === 'finale'
+        ? `🏍️ Trofeo cross alla coppia che ha vinto la finale: <b>${nomeCop(vc.premiata)}</b>!`
+        : `🏍️ Vince il cross la coppia <b>${nomeCop(cP.n)}</b> con ${cP.tot} punti!`;
+      if (vc.finale && vc.aPunti && vc.finale !== vc.aPunti)
+        t += vc.regola === 'finale' ? ` Più punti per ${nomeCop(vc.aPunti)}.` : ` La finale l'ha vinta ${nomeCop(vc.finale)}.`;
+      dici(t, 'oro', 'Cross');
     }
     if (sv.assoluta && !svP.assoluta && (nuovo.assoluta || []).length) {
       const r = nuovo.assoluta[0];
