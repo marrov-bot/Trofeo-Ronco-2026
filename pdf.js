@@ -31,13 +31,11 @@ const PDF = {
     table.pt td.nm { font-weight: 700; }
     table.pt td.tot { font-weight: 800; }
     table.pt td.pts { font-weight: 800; color: #334155; font-size: 14px; }
-    table.pt td.best { background: #d5dfe8 !important; font-weight: 700; }
+    table.pt small.pg { color: #8295a6; font-size: 10.5px; font-weight: 600; margin-left: 3px; }
     table.pt tr.p1 td.pos { color: #fff; background: #ca8a04 !important; }
     table.pt tr.p2 td.pos { color: #fff; background: #94a3b8 !important; }
     table.pt tr.p3 td.pos { color: #fff; background: #b45309 !important; }
     table.pt tr.rit td { color: #94a3b8; }
-    .leg { font-size: 10.5px; color: #64748b; margin-top: 6px; }
-    .leg span { background: #d5dfe8; padding: 0 5px; border-radius: 3px; color: #0f172a; }
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .win { margin: 16px 0 0; padding: 10px 14px; border-radius: 10px; background: #e7edf2; border-left: 6px solid #5c7286; font-size: 15px; color: #1e293b; }
     .pf { position: absolute; left: 40px; right: 40px; bottom: 22px; border-top: 1px solid #e2e8f0; padding-top: 6px;
@@ -53,17 +51,18 @@ const PDF = {
   // ---------------- ENDURO: 3 giri, totale, distacco, punti
   enduro(stato) {
     const cl = R.classifica(stato), fini = cl.filter(r => r.giri === 3 && !r.rit), altri = cl.filter(r => !(r.giri === 3 && !r.rit));
-    const best = [0, 1, 2].map(g => Math.min(...cl.map(r => r.t[g]).filter(R.ok)));
+    // posizione nel singolo giro: a pari tempo stessa posizione (3, 3, poi 5)
+    const tg = [0, 1, 2].map(g => cl.map(r => r.t[g]).filter(R.ok));
+    const posG = (v, g) => 1 + tg[g].filter(x => x < v).length;
     const riga = (r, rit) => `<tr class="${r.pos <= 3 && !rit ? 'p' + r.pos : ''} ${rit ? 'rit' : ''}">
       <td class="pos">${rit ? '–' : r.pos}</td><td class="num">${r.p.num}</td><td class="l nm">${PDF.esc(r.p.nome)}</td>
-      ${r.t.map((v, g) => `<td class="${v === best[g] ? 'best' : ''}">${v != null ? R.fmt(v) : '–'}</td>`).join('')}
+      ${r.t.map((v, g) => `<td>${R.ok(v) ? R.fmt(v) + `<small class="pg">(${posG(v, g)})</small>` : v != null ? R.fmt(v) : '–'}</td>`).join('')}
       <td class="tot">${rit ? (r.rit ? 'Rit.' : '') : R.fmt(r.somma)}</td><td>${!rit && r.distacco != null ? R.gap(r.distacco) : ''}</td>
       <td class="pts">${rit ? '' : r.punti}</td></tr>`;
     return PDF.testa('Classifica enduro') + `
       <h3 class="ps">Prova a cronometro · 3 giri</h3>
       <table class="pt"><tr><th>Pos</th><th>N°</th><th class="l">Pilota</th><th>Giro 1</th><th>Giro 2</th><th>Giro 3</th><th>Totale</th><th>Distacco</th><th>Punti</th></tr>
-      ${fini.map(r => riga(r, false)).join('')}${altri.map(r => riga(r, true)).join('')}</table>
-      <div class="leg"><span>evidenziato</span> = giro più veloce</div>` + PDF.piede();
+      ${fini.map(r => riga(r, false)).join('')}${altri.map(r => riga(r, true)).join('')}</table>` + PDF.piede();
   },
 
   // ---------------- CROSS: ogni manche, la finale, poi il totale per coppia
