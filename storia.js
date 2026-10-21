@@ -113,7 +113,7 @@ const STORIA = {
     'In pista oggi può esserci un campione del mondo: Lesiardo ha appena vinto la Sei Giorni con l\'Italia.',
     'Su questi prati è passato anche Stefan Merriman, quattro volte campione del mondo di enduro.',
     'Il Ronco è il nostro piccolo Ranch: prati, bosco e amici dal tempo dell\'infanzia.',
-    'Dal 2024 si parte a ranking inverso: prima i più lenti, poi i più veloci. Lo spettacolo sale.',
+    'Si parte a ranking inverso: gli ultimi a partire sono quelli con il ranking migliore.',
     'Il Ronco è beneficenza: canili, Ospedale di Piacenza, banchi di scuola in Etiopia con Miku.',
     'Dal 2023 il cross a coppie: il 1° dell\'enduro corre con l\'ultimo. Nessuno è tagliato fuori.',
     'Penalità: 3 punti a chi abbatte paletti o fettucce. Occhio!',
