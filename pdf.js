@@ -31,6 +31,7 @@ const PDF = {
     table.pt td.nm { font-weight: 700; }
     table.pt td.tot { font-weight: 800; }
     table.pt td.pts { font-weight: 800; color: #334155; font-size: 14px; }
+    table.pt td.rk { color: #64748b; font-size: 11px; text-align: center; }
     table.pt small.pg { color: #8295a6; font-size: 10.5px; font-weight: 600; margin-left: 3px; }
     table.pt tr.p1 td.pos { color: #fff; background: #ca8a04 !important; }
     table.pt tr.p2 td.pos { color: #fff; background: #94a3b8 !important; }
@@ -55,13 +56,13 @@ const PDF = {
     const tg = [0, 1, 2].map(g => cl.map(r => r.t[g]).filter(R.ok));
     const posG = (v, g) => 1 + tg[g].filter(x => x < v).length;
     const riga = (r, rit) => `<tr class="${r.pos <= 3 && !rit ? 'p' + r.pos : ''} ${rit ? 'rit' : ''}">
-      <td class="pos">${rit ? '–' : r.pos}</td><td class="num">${r.p.num}</td><td class="l nm">${PDF.esc(r.p.nome)}</td>
+      <td class="pos">${rit ? '–' : r.pos}</td><td class="num">${r.p.num}</td><td class="l nm">${PDF.esc(r.p.nome)}</td><td class="rk">${r.p.rnk ?? ''}</td>
       ${r.t.map((v, g) => `<td>${R.ok(v) ? R.fmt(v) + `<small class="pg">(${posG(v, g)})</small>` : v != null ? R.fmt(v) : '–'}</td>`).join('')}
       <td class="tot">${rit ? (r.rit ? 'Rit.' : '') : R.fmt(r.somma)}</td><td>${!rit && r.distacco != null ? R.gap(r.distacco) : ''}</td>
       <td class="pts">${rit ? '' : r.punti}</td></tr>`;
     return PDF.testa('Classifica enduro') + `
       <h3 class="ps">Prova a cronometro · 3 giri</h3>
-      <table class="pt"><tr><th>Pos</th><th>N°</th><th class="l">Pilota</th><th>Giro 1</th><th>Giro 2</th><th>Giro 3</th><th>Totale</th><th>Distacco</th><th>Punti</th></tr>
+      <table class="pt"><tr><th>Pos</th><th>N°</th><th class="l">Pilota</th><th>Rnk</th><th>Giro 1</th><th>Giro 2</th><th>Giro 3</th><th>Totale</th><th>Distacco</th><th>Punti</th></tr>
       ${fini.map(r => riga(r, false)).join('')}${altri.map(r => riga(r, true)).join('')}</table>` + PDF.piede();
   },
 

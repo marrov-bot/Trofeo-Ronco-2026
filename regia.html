@@ -15,15 +15,19 @@
   .kpi div { background: #fff; border-radius: 12px; padding: 10px; text-align: center; border: 1px solid #e2e8f0; }
   .kpi b { display: block; font-size: 22px; color: #0284c7; }
   .kpi span { font-size: 11px; color: #64748b; text-transform: uppercase; }
-  .pl { display: grid; grid-template-columns: 30px 44px 1fr 34px 34px 52px; gap: 6px; align-items: center; padding: 8px 4px; border-bottom: 1px solid #f1f5f9; background: #fff; }
+  .pl { display: grid; grid-template-columns: 26px 40px 1fr 46px 34px 34px 52px; gap: 6px; align-items: center; padding: 8px 4px; border-bottom: 1px solid #f1f5f9; background: #fff; }
   .pl.no { opacity: .45; }
   .pl .o { color: #94a3b8; font-size: 12px; text-align: center; }
   .pl .n { font-weight: 800; color: #0284c7; }
   .pl small { display: block; color: #64748b; font-size: 11px; }
   .pl button { border: 1px solid #cbd5e1; background: #fff; border-radius: 8px; padding: 6px 0; font-size: 14px; }
+  .fx { display: flex; flex-wrap: wrap; gap: 6px; }
+  .fx button { border: 1px solid #cbd5e1; background: #fff; border-radius: 16px; padding: 6px 10px; font-size: 12px; }
+  .fx button.off { background: #fee2e2; border-color: #fca5a5; color: #991b1b; text-decoration: line-through; }
+  .pl .rk { font-size: 12px; color: #475569; background: #f1f5f9; }
   .pl .pr { font-size: 11px; font-weight: 700; }
   .pl .pr.si { background: #dcfce7; border-color: #86efac; color: #166534; }
-  .add { display: grid; grid-template-columns: 70px 1fr 1fr; gap: 6px; margin-top: 10px; }
+  .add { display: grid; grid-template-columns: 80px 1fr; gap: 6px; margin-top: 10px; }
   .add input, select { padding: 10px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; width: 100%; background: #fff; }
   .lotto td { border-top: 2px solid #e2e8f0; }
   .cp .k small { display: block; font-size: 10px; color: #64748b; }
@@ -65,6 +69,9 @@ let pin = R.getPin('regia'), stato = null, vista = 'piloti';
 let bozza = null;                     // modifiche piloti non ancora salvate
 const CKEY = 'ronco26_coppie_corrette';
 let corr = (() => { try { return JSON.parse(localStorage.getItem(CKEY)) || {}; } catch(e){ return {}; } })();
+// chi non corre il cross (resta in classifica enduro, esce solo dalle coppie)
+const FKEY = 'ronco26_fuori_cross';
+let fuoriCross = (() => { try { return JSON.parse(localStorage.getItem(FKEY)) || []; } catch(e){ return []; } })();
 
 function tab(v){ vista = v; disegna(); }
 const nome = p => p ? p.nome : '';   // nome e cognome per intero, anche su WhatsApp
@@ -84,29 +91,34 @@ function vPiloti(){
   document.getElementById('view').innerHTML = `
     <div class="dirty" id="dirty" style="display:${bozza?'block':'none'}">Modifiche non salvate</div>
     <div class="kpi"><div><b>${pres.length}</b><span>presenti</span></div><div><b>${lista.length - pres.length}</b><span>assenti</span></div><div><b>${Math.ceil(pres.length/3)}</b><span>terzetti</span></div></div>
-    <p class="note">Ordine di partenza dall'alto. ▲▼ per spostare, tocca SI/NO per la presenza. Il N° di gara non cambia mai (è sulla moto).</p>
+    <p class="note">Ordine di partenza dall'alto. ▲▼ per spostare, tocca SI/NO per la presenza, tocca il ranking per cambiarlo. Il N° di gara non cambia mai (è sulla moto).</p>
     <div class="card" style="padding:4px">${lista.map((p,i) => {
       const o = p.presente ? ++k : '';
       return `<div class="pl ${p.presente?'':'no'}" ${p.presente && (k-1)%3===0 && k>1 ? 'style="border-top:2px solid #cbd5e1"' : ''}>
         <span class="o">${o}</span><span class="n">${p.num}</span>
         <span>${R.esc(p.nome)}<small>${R.esc(p.sopr||'')}</small></span>
+        <button class="rk" onclick="ranking(${i})" title="Ranking">${p.rnk ?? '–'}</button>
         <button onclick="muovi(${i},-1)">▲</button><button onclick="muovi(${i},1)">▼</button>
         <button class="pr ${p.presente?'si':''}" onclick="presenza(${i})">${p.presente?'SI':'NO'}</button></div>`;
     }).join('')}</div>
+    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="ordinaRanking()">↕ Ordina per ranking (inverso: il migliore parte per ultimo)</button>
     <h2 class="sec">Aggiungi pilota</h2>
-    <div class="add"><input id="an" inputmode="numeric" placeholder="N°"><input id="anm" placeholder="Nome e cognome"><input id="as" placeholder="Soprannome"></div>
+    <div class="add"><input id="an" inputmode="numeric" placeholder="N°"><input id="anm" placeholder="Nome e cognome"><input id="ar" inputmode="numeric" placeholder="Ranking"><input id="as" placeholder="Soprannome"></div>
     <button class="btn ghost" style="width:100%;margin-top:8px" onclick="aggiungi()">+ Aggiungi in fondo</button>
     <div class="row2"><button class="btn ghost" onclick="bozza=null;disegna()">Annulla modifiche</button><button class="btn att" onclick="salvaPiloti()">💾 Salva sul foglio</button></div>`;
 }
 function copiaBozza(){ if (!bozza) bozza = stato.piloti.slice().sort((a,b) => a.ordine - b.ordine).map(p => ({...p})); }
 function muovi(i, d){ copiaBozza(); const j = i + d; if (j < 0 || j >= bozza.length) return; [bozza[i], bozza[j]] = [bozza[j], bozza[i]]; disegna(); }
+function ranking(i){ copiaBozza(); const v = prompt('Ranking di ' + bozza[i].nome, bozza[i].rnk ?? ''); if (v === null) return; bozza[i].rnk = v.trim() === '' ? null : +v; disegna(); }
+// senza ranking (nuovi) partono per primi, poi dal ranking più alto al più basso
+function ordinaRanking(){ copiaBozza(); bozza.sort((a, b) => (b.rnk ?? 1e9) - (a.rnk ?? 1e9)); disegna(); }
 function presenza(i){ copiaBozza(); bozza[i].presente = !bozza[i].presente; disegna(); }
 function aggiungi(){
-  const num = +document.getElementById('an').value, nm = document.getElementById('anm').value.trim(), so = document.getElementById('as').value.trim();
+  const num = +document.getElementById('an').value, nm = document.getElementById('anm').value.trim(), so = document.getElementById('as').value.trim(), rk = document.getElementById('ar').value.trim();
   if (!num || !nm) return alert('Servono numero e nome');
   copiaBozza();
   if (bozza.some(p => p.num === num)) return alert('Numero già usato');
-  bozza.push({num, nome: nm, sopr: so, presente: true}); disegna();
+  bozza.push({num, nome: nm, sopr: so, presente: true, rnk: rk === '' ? null : +rk}); disegna();
 }
 async function salvaPiloti(){
   if (!bozza) return R.toast('Niente da salvare');
@@ -138,7 +150,7 @@ async function svela(cosa, v){
 // ---------- COPPIE: proposta automatica, correzioni, invio su WhatsApp
 // coppie proposte (classifica enduro + correzioni) → [[pilota A, pilota B o null], …]
 function coppieProposte(){
-  return R.coppie(stato).map((c, i) => {
+  return R.coppie(stato, fuoriCross).map((c, i) => {
     const k = corr[i+1];
     if (!k) return c;
     const P = n => n ? stato.piloti.find(p => p.num === n) || null : null;
@@ -179,8 +191,12 @@ function manche(i, cp){
   return n1 <= n2 ? 1 : 2;
 }
 function vCoppie(){
+  // gara azzerata (nessun tempo): via le scelte rimaste dalle prove
+  if (!Object.values(stato.tempi || {}).some(t => t.some(v => v != null)) && (fuoriCross.length || Object.keys(corr).length)) {
+    fuoriCross = []; corr = {}; salvaCorr(); try { localStorage.setItem(FKEY, '[]'); } catch(e){}
+  }
   const finito = R.giroInCorso(stato) > 3;
-  const cp = coppieFinali(), pres = stato.piloti.filter(p => p.presente).sort((a,b) => a.ordine - b.ordine);
+  const cp = coppieFinali(), tutti = stato.piloti.filter(p => p.presente).sort((a,b) => a.ordine - b.ordine), pres = tutti.filter(p => !fuoriCross.includes(p.num));
   const opt = (sel, conNessuno) => (conNessuno ? `<option value="0" ${sel==null?'selected':''}>— Marathon (da solo)</option>` : '') +
     pres.map(p => `<option value="${p.num}" ${sel && sel.num===p.num?'selected':''}>${p.num} ${R.esc(nome(p))}</option>`).join('');
   const conf = coppieConfermate();
@@ -191,6 +207,10 @@ function vCoppie(){
     <div class="dirty" style="display:block;${conf.length && uguali ? 'background:#dcfce7;border-color:#86efac;color:#166534' : ''}">
       ${conf.length ? (uguali ? '✅ Coppie confermate: le ragazze le vedono nel crono' : '⚠️ Le coppie qui sotto sono diverse da quelle confermate') : 'Coppie non ancora confermate'}</div>
     <p class="note">Proposta automatica dalla classifica enduro: 1° con ultimo, 2° con penultimo… Con piloti dispari, il centrale corre la Marathon. Manche alternate: coppie 1, 3, 5… in M1; 2, 4, 6… in M2. Cambia una coppia dai menu: la correzione resta su questo telefono.</p>
+    <h2 class="sec">Chi non corre il cross?</h2>
+    <p class="note">Tocca un pilota per toglierlo dalle coppie (resta nella classifica enduro con i suoi punti). Le coppie si rifanno da sole senza di lui.</p>
+    <div class="fx">${tutti.map(p => `<button class="${fuoriCross.includes(p.num) ? 'off' : ''}" onclick="fuori(${p.num})">${fuoriCross.includes(p.num) ? '🚫 ' : ''}${R.esc(nome(p))}</button>`).join('')}</div>
+    <h2 class="sec">Coppie</h2>
     ${cp.map((c,i) => `<div class="cp"><span class="k">${i+1}<small>M${manche(i, cp)}</small></span>
       <select onchange="correggi(${i+1},0,this.value)">${opt(c[0])}</select>
       <select onchange="correggi(${i+1},1,this.value)">${opt(c[1], true)}</select></div>`).join('')}
@@ -213,6 +233,14 @@ function correggi(i, lato, v){
   const c = coppieFinali()[i-1];
   corr[i] = corr[i] || [c[0].num, c[1] ? c[1].num : 0];
   corr[i][lato] = +v; salvaCorr(); disegna();
+}
+function fuori(num){
+  const i = fuoriCross.indexOf(num);
+  if (Object.keys(corr).length && !confirm('Le correzioni fatte a mano alle coppie verranno azzerate. Continuare?')) return;
+  i < 0 ? fuoriCross.push(num) : fuoriCross.splice(i, 1);
+  corr = {}; salvaCorr();
+  try { localStorage.setItem(FKEY, JSON.stringify(fuoriCross)); } catch(e){}
+  disegna();
 }
 function salvaCorr(){ try { localStorage.setItem(CKEY, JSON.stringify(corr)); } catch(e){} }
 function anteprima(){ document.getElementById('txt').value = testoWA(); }

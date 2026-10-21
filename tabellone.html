@@ -22,7 +22,7 @@
   .main { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; padding: 10px 12px; height: calc(100vh - 60px - 42px); }
   .panel { background: #111a2e; border: 1px solid #1e293b; border-radius: 14px; padding: 8px 10px; overflow: hidden; display: flex; flex-direction: column; }
   .panel h2 { margin: 0 0 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; color: #7dd3fc; }
-  .cl { flex: 1; overflow: hidden; }
+  .cl { flex: 1; overflow-y: auto; overflow-x: hidden; }
   .cl .r { display: grid; grid-template-columns: 1.6em 2.6em 1fr 4.6em 4.2em 4.4em 2em; font-size: calc(var(--rh, 40px) * .6); align-items: center; gap: 6px; height: var(--rh, 40px); padding: 0 4px; border-bottom: 1px solid #1e293b; font-variant-numeric: tabular-nums; transition: background .6s; }
   .cl .r.h span { font-size: 11px; }
   .cl .r.h { height: 18px !important; color: #64748b; text-transform: uppercase; border: none; padding-bottom: 2px; }
@@ -202,7 +202,7 @@ function commentaFineGiro(g){
   if (g < 3) {
     dici(`Giro ${g} archiviato! Comanda <b>${nome(a.p)}</b>${b ? ` con ${R.gap(b.somma - a.somma).slice(1)} su ${nome(b.p)}` : ''}. ${pick(['Si riparte!', 'Niente è deciso.', 'Tutto aperto.'])}`, 'oro', `Fine giro ${g}`);
   } else {
-    dici(`🔒 Crono chiuso! Tutti i tempi sono dentro. Chi ha vinto? Lo scoprite alla premiazione…`, 'oro', 'Fine crono');
+    dici(`🔒 Crono chiuso! Tutti i tempi sono dentro. La classifica la scopriamo dopo, alla premiazione…`, 'oro', 'Fine crono');
   }
 }
 function annunciaVincitore(){
@@ -223,7 +223,13 @@ function novita(nuovo){
     visti = JSON.parse(JSON.stringify(nuovo.tempi));
     stato = nuovo;
     const g = Math.min(R.giroInCorso(nuovo), 3);
-    mostra(`Benvenuti al <b>Trofeo Ronco 2026</b>, ${STORIA.edizione}! ${pick(STORIA.curiosita)}`, 'storia', 'Ronco story');
+    const fatti = Object.values(nuovo.tempi || {}).filter(t => t[g - 1] != null).length;
+    const pres = nuovo.piloti.filter(p => p.presente && !R.fuori(nuovo, p.num, g)).length;
+    if (!Object.values(nuovo.tempi || {}).some(t => t.some(v => v != null)))
+      mostra(`Benvenuti al <b>Trofeo Ronco 2026</b>, ${STORIA.edizione}! ${pick(STORIA.curiosita)}`, 'storia', 'Ronco story');
+    else if ((nuovo.coppie || []).length) mostra(`Si torna in pista: è il momento del <b>cross a coppie</b>!`, '', 'Live');
+    else if (R.giroInCorso(nuovo) > 3) mostra(`🔒 Crono chiuso! La classifica la scopriamo dopo, alla premiazione…`, 'oro', 'Fine crono');
+    else mostra(`Giro ${g} in corso: ${fatti} tempi su ${pres}. Si continua!`, '', 'Live');
     return;
   }
   const prima = stato;
@@ -290,7 +296,8 @@ function vista(){
 
 // ---------- disegno
 const fl = num => flash.has(num) ? 'flash' : '';
-const T = (pos, num, nm, a, b, c, d, cls = '') => `<div class="r ${cls}"><span class="pos p${pos}">${pos || ''}</span><span class="num">${num}</span><span class="nm"><b>${nm}</b></span><span class="sec">${a}</span><span class="gap">${b}</span><span class="ctot">${c}</span><span class="cpos">${d}</span></div>`;
+const rkN = num => { const p = stato.piloti.find(x => x.num === Number(num)); return p && p.rnk != null ? `<small>rnk ${p.rnk}</small>` : ''; };
+const T = (pos, num, nm, a, b, c, d, cls = '') => `<div class="r ${cls}"><span class="pos p${pos}">${pos || ''}</span><span class="num">${num}</span><span class="nm"><b>${nm}</b>${rkN(num)}</span><span class="sec">${a}</span><span class="gap">${b}</span><span class="ctot">${c}</span><span class="cpos">${d}</span></div>`;
 const H = (a, b, c, d) => `<div class="r h"><span>Pos</span><span>N°</span><span>Pilota</span><span style="text-align:right">${a}</span><span style="text-align:right">${b}</span><span style="text-align:right">${c}</span><span>${d}</span></div>`;
 const titolo = (stato_, sotto) => { document.getElementById('giro').textContent = stato_; document.getElementById('clTitle').textContent = sotto; };
 
@@ -469,7 +476,7 @@ setInterval(() => document.getElementById('clock').textContent = new Date().toLo
 
 // schermo sempre acceso (se il browser lo permette)
 async function svegli(){ try { await navigator.wakeLock.request('screen'); } catch(e){} }
-document.addEventListener('click', svegli); document.addEventListener('visibilitychange', () => { if (!document.hidden) svegli(); });
+document.addEventListener('click', svegli); document.addEventListener('visibilitychange', () => { if (!document.hidden) { svegli(); if (stato) leggi(); } });
 
 function avvia(s){ novita(s); disegna(); ticker(); setInterval(leggi, 5000); setInterval(silenzio, 15000); setInterval(ticker, 300000); svegli(); }
 if (pin) R.leggi(pin).then(s => s.ok ? avvia(s) : (R.setPin('tabellone',''), R.chiediPin('tabellone', 'Tabellone', (p, s) => { pin = p; avvia(s); })))

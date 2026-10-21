@@ -103,8 +103,9 @@ const R = {
   },
 
   // ---------- coppie cross: 1° con ultimo, 2° con penultimo… dispari = Marathon
-  coppie(stato) {
-    const ord = R.classifica(stato).map(r => r.p);
+  // fuori = N° di chi non corre il cross: esclusi solo dalle coppie, la classifica enduro non cambia
+  coppie(stato, fuori = []) {
+    const ord = R.classifica(stato).map(r => r.p).filter(p => !fuori.includes(p.num));
     const out = [], n = ord.length;
     for (let i = 0; i < Math.floor(n / 2); i++) out.push([ord[i], ord[n - 1 - i]]);
     if (n % 2) out.push([ord[Math.floor(n / 2)], null]);
