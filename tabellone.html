@@ -176,9 +176,9 @@ function commentaTempo(num, g, val, prima){
   }
   // 3. sfida storica: quando arriva il secondo dei due
   for (const [a, b, titolo, prec] of (g === 3 ? [] : STORIA.sfide)) {
-    if (p.num !== a && p.num !== b) continue;
-    const altro = p.num === a ? b : a;
-    const ra = cl.find(r => r.p.num === p.num), rb = cl.find(r => r.p.num === altro);
+    if (p.nome !== a && p.nome !== b) continue;
+    const altro = p.nome === a ? b : a;
+    const ra = cl.find(r => r.p.num === p.num), rb = cl.find(r => r.p.nome === altro);
     if (!ra || !rb || ra.giri !== g || rb.giri !== g) continue;
     const davanti = ra.somma <= rb.somma ? ra : rb, dietro = davanti === ra ? rb : ra;
     return dici(`${titolo}: dopo ${g} ${g > 1 ? 'giri' : 'giro'} <b>${nome(davanti.p)}</b> davanti a ${nome(dietro.p)} di ${R.gap(dietro.somma - davanti.somma).slice(1)}. Precedenti: ${prec}`, 'storia', 'La sfida');
@@ -191,7 +191,7 @@ function commentaTempo(num, g, val, prima){
     if (d >= 6) return dici(`<b>${n}</b> perde ${d.toFixed(2).replace('.', ',')} sul giro ${g-1}… tutto bene nel bosco? ${me && me.pos && g < 3 ? `Resta ${me.pos}°.` : ''}`, 'rosso', 'Occhio');
   }
   // 5. normale, con un pizzico di storia
-  const curios = STORIA.piloti[p.num];
+  const curios = STORIA.piloti[p.nome];
   const extra = curios && Math.random() < 0.6 ? ` <i>${pick(curios)}.</i>` : '';
   dici(`<b>${n}</b> chiude il giro ${g} in ${R.fmt(val)}: ${posG}° nel giro${me && me.pos && g === 2 ? `, ${me.pos}° provvisorio dopo ${g} giri` : ''}.${extra}`);
 }
@@ -211,7 +211,7 @@ function annunciaVincitore(){
   if (!a) return;
   {
     let storia = '';
-    if (a.p.num === 114 || a.p.num === 118) storia = ` Quarta vittoria: la bella è di ${nome(a.p)}!`;
+    if (a.p.nome === 'Marco Rovero' || a.p.nome === 'Andrea Castellana') storia = ` Quarta vittoria: la bella è di ${nome(a.p)}!`;
     else storia = ` Per la prima volta in sette edizioni non vince né Rover né Caste. Storico!`;
     dici(`🏁 Crono finito! Vince <b>${nome(a.p)}</b> in ${R.fmt(a.somma)}${b ? `, ${R.gap(b.somma - a.somma).slice(1)} su ${nome(b.p)}` : ''}.${storia}`, 'oro', 'Vincitore enduro');
   }
@@ -440,7 +440,8 @@ function commentaCross(prima, nuovo){
     }
     if (sv.assoluta && !svP.assoluta && (nuovo.assoluta || []).length) {
       const r = nuovo.assoluta[0];
-      const bis = {116: 'Geki fa il bis dopo il 2024!', 117: 'Lavelli fa il bis dopo il 2025!'}[r.num]
+      const nmA = (nuovo.piloti.find(x => x.num === r.num) || {}).nome;
+      const bis = {'Riccardo Chiappa': 'Geki fa il bis dopo il 2024!', 'Eric Lavelli': 'Lavelli fa il bis dopo il 2025!', 'Paolo Bernardi': 'Cipol torna a vincere dopo il 2023!'}[nmA]
         || 'Dal 2023, con il cross, l\'assoluta l\'hanno vinta Cipol, Geki e Lavelli: nell\'era del cross è la prima volta per lui!';
       dici(`🏆 Assoluto 2026: <b>${sp(r.num)}</b> con ${r.tot} punti! ${bis}`, 'oro', 'Assoluto');
     }
@@ -449,7 +450,7 @@ function commentaCross(prima, nuovo){
 
 function ticker(){
   const frasi = STORIA.curiosita.slice();
-  Object.entries(STORIA.piloti).forEach(([num, f]) => { const p = stato.piloti.find(x => x.num === +num && x.presente); if (p) frasi.push(`${nome(p)}: ${f[0]}`); });
+  Object.entries(STORIA.piloti).forEach(([nm, f]) => { const p = stato.piloti.find(x => x.nome === nm && x.presente); if (p) frasi.push(`${nome(p)}: ${f[0]}`); });
   const run = document.getElementById('run');
   run.textContent = frasi.sort(() => Math.random() - .5).join('   •   ');
   // velocità costante e lenta: circa 45 pixel al secondo, qualunque sia la lunghezza del testo
@@ -467,8 +468,8 @@ async function leggi(){
 }
 function silenzio(){ // dopo 45" senza tempi, una curiosità
   if (Date.now() - ultimoCommento > 45000) {
-    const vivi = stato.piloti.filter(p => p.presente && STORIA.piloti[p.num]);
-    if (Math.random() < .5 && vivi.length) { const p = pick(vivi); dici(`Lo sapevate? <b>${nome(p)}</b>: ${pick(STORIA.piloti[p.num])}.`, 'storia', 'Ronco story'); }
+    const vivi = stato.piloti.filter(p => p.presente && STORIA.piloti[p.nome]);
+    if (Math.random() < .5 && vivi.length) { const p = pick(vivi); dici(`Lo sapevate? <b>${nome(p)}</b>: ${pick(STORIA.piloti[p.nome])}.`, 'storia', 'Ronco story'); }
     else dici(pick(STORIA.curiosita), 'storia', 'Ronco story');
   }
 }

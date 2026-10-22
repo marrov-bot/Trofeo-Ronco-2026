@@ -90,17 +90,19 @@ function vPiloti(){
   let k = 0;
   document.getElementById('view').innerHTML = `
     <div class="dirty" id="dirty" style="display:${bozza?'block':'none'}">Modifiche non salvate</div>
-    <div class="kpi"><div><b>${pres.length}</b><span>presenti</span></div><div><b>${lista.length - pres.length}</b><span>assenti</span></div><div><b>${Math.ceil(pres.length/3)}</b><span>terzetti</span></div></div>
-    <p class="note">Ordine di partenza dall'alto. ▲▼ per spostare, tocca SI/NO per la presenza, tocca il ranking per cambiarlo. Il N° di gara non cambia mai (è sulla moto).</p>
+    <div class="kpi"><div><b>${pres.length}</b><span>presenti</span></div><div><b>${lista.length - pres.length}</b><span>assenti</span></div><div><b>${gruppi(pres.length).length}</b><span>gruppi</span></div></div>
+    <p class="note">Ordine di partenza dall'alto. ▲▼ per spostare, tocca SI/NO per la presenza, tocca il ranking per cambiarlo. Dopo aver deciso presenze e ordine, «🔢 Numeri in ordine di partenza» assegna 101, 102… (solo prima che ci siano tempi).</p>
     <div class="card" style="padding:4px">${lista.map((p,i) => {
       const o = p.presente ? ++k : '';
-      return `<div class="pl ${p.presente?'':'no'}" ${p.presente && (k-1)%3===0 && k>1 ? 'style="border-top:2px solid #cbd5e1"' : ''}>
-        <span class="o">${o}</span><span class="n">${p.num}</span>
+      return `<div class="pl ${p.presente?'':'no'}" ${p.presente && k>1 && inizi(pres.length).includes(k) ? 'style="border-top:3px solid #0284c7"' : ''}>
+        <span class="o">${p.presente && inizi(pres.length).concat([1]).includes(k) ? '<b style="color:#0284c7">G' + (inizi(pres.length).concat([1]).filter(x => x <= k).length) + '</b><br>' : ''}${o}</span><span class="n">${p.num}</span>
         <span>${R.esc(p.nome)}<small>${R.esc(p.sopr||'')}</small></span>
         <button class="rk" onclick="ranking(${i})" title="Ranking">${p.rnk ?? '–'}</button>
         <button onclick="muovi(${i},-1)">▲</button><button onclick="muovi(${i},1)">▼</button>
         <button class="pr ${p.presente?'si':''}" onclick="presenza(${i})">${p.presente?'SI':'NO'}</button></div>`;
     }).join('')}</div>
+    <div class="add" style="grid-template-columns:1fr 110px;align-items:center"><span class="note" style="margin:0">Gruppi di partenza (es. 4 oppure 4-4-5-5): li vedono anche le ragazze nel crono</span><input id="gr" value="${R.esc(schemaG())}" onchange="setGruppi(this.value)"></div>
+    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="rinumera()">🔢 Numeri in ordine di partenza (101, 102, 103…)</button>
     <button class="btn ghost" style="width:100%;margin-top:8px" onclick="ordinaRanking()">↕ Ordina per ranking (inverso: il migliore parte per ultimo)</button>
     <h2 class="sec">Aggiungi pilota</h2>
     <div class="add"><input id="an" inputmode="numeric" placeholder="N°"><input id="anm" placeholder="Nome e cognome"><input id="ar" inputmode="numeric" placeholder="Ranking"><input id="as" placeholder="Soprannome"></div>
@@ -112,6 +114,22 @@ function muovi(i, d){ copiaBozza(); const j = i + d; if (j < 0 || j >= bozza.len
 function ranking(i){ copiaBozza(); const v = prompt('Ranking di ' + bozza[i].nome, bozza[i].rnk ?? ''); if (v === null) return; bozza[i].rnk = v.trim() === '' ? null : +v; disegna(); }
 // senza ranking (nuovi) partono per primi, poi dal ranking più alto al più basso
 function ordinaRanking(){ copiaBozza(); bozza.sort((a, b) => (b.rnk ?? 1e9) - (a.rnk ?? 1e9)); disegna(); }
+// gruppi di partenza: salvati sul foglio (Config → GRUPPI), li vede anche il crono
+const schemaG = () => (stato && stato.gruppi) || '4';
+async function setGruppi(v){
+  try { const r = await R.scrivi({a: 'gruppi', pin, val: (v || '4').trim()}); if (!r.ok) { alert('Errore: ' + r.errore); return disegna(); } stato = r; R.toast('Gruppi salvati: li vede anche il crono'); disegna(); }
+  catch(e){ alert('Nessuna connessione: riprova'); disegna(); }
+}
+const gruppi = n => R.gruppi(schemaG(), n);
+function inizi(n){ const o = []; let k = 1; gruppi(n).forEach(g => { o.push(k); k += g; }); return o.slice(1); }
+// numeri di gara = ordine di partenza: presenti 101, 102…, poi gli assenti
+function rinumera(){
+  if (Object.values(stato.tempi || {}).some(t => t.some(v => v != null))) return alert('Ci sono già tempi: i numeri non si possono più cambiare (prima esegui azzeraTempi).');
+  if (!confirm('Rinumerare tutti i piloti in ordine di partenza (101, 102…)? Poi ricordati di consegnare le tabelle con i nuovi numeri.')) return;
+  copiaBozza();
+  const pres = bozza.filter(p => p.presente), ass = bozza.filter(p => !p.presente);
+  bozza = pres.concat(ass); bozza.forEach((p, i) => p.num = 101 + i); disegna();
+}
 function presenza(i){ copiaBozza(); bozza[i].presente = !bozza[i].presente; disegna(); }
 function aggiungi(){
   const num = +document.getElementById('an').value, nm = document.getElementById('anm').value.trim(), so = document.getElementById('as').value.trim(), rk = document.getElementById('ar').value.trim();

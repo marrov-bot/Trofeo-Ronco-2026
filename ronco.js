@@ -103,6 +103,20 @@ const R = {
   },
 
   // ---------- coppie cross: 1° con ultimo, 2° con penultimo… dispari = Marathon
+  // gruppi di partenza: "4" = tutti da 4; "4-4-5-5" = esatti. Restituisce le dimensioni dei gruppi.
+  gruppi(schema, n) {
+    const parti = String(schema || '4').split(/[^0-9]+/).map(Number).filter(x => x > 0), out = [];
+    let resto = n, i = 0;
+    while (resto > 0) { const g = parti.length > 1 ? (parti[i] || parti[parti.length - 1]) : (parti[0] || 4); out.push(Math.min(g, resto)); resto -= g; i++; }
+    return out;
+  },
+  // per la posizione k (1 = primo a partire): { g: n° gruppo, i: posto nel gruppo, n: piloti nel gruppo }
+  gruppoDi(schema, n, k) {
+    let start = 1, g = 0;
+    for (const dim of R.gruppi(schema, n)) { g++; if (k < start + dim) return { g, i: k - start + 1, n: dim }; start += dim; }
+    return null;
+  },
+
   // fuori = N° di chi non corre il cross: esclusi solo dalle coppie, la classifica enduro non cambia
   coppie(stato, fuori = []) {
     const ord = R.classifica(stato).map(r => r.p).filter(p => !fuori.includes(p.num));

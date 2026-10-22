@@ -33,6 +33,7 @@
   tr.cur td { background: #e0f2fe; }
   tr.pend td { color: #b45309; }
   td.t { color: #0369a1; font-weight: 600; text-decoration: underline dotted; cursor: pointer; }
+  tr.grp td { background: #e0f2fe; color: #0369a1; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; text-align: left; padding: 6px 8px; }
   .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 6px; border-bottom: 1px solid #f1f5f9; font-size: 15px; }
   .row b { color: #0284c7; margin-right: 8px; }
   .row .st { font-size: 13px; color: #64748b; font-variant-numeric: tabular-nums; }
@@ -110,6 +111,12 @@ function prossimo(daNum){
 }
 
 // ---------- disegno
+// «Gruppo 2 · 3° di 4 · » sopra il nome del pilota
+function grpTesto(num){
+  const lista = presenti(), k = lista.findIndex(p => p.num === num) + 1;
+  const gi = k ? R.gruppoDi(server.gruppi, lista.length, k) : null;
+  return gi ? `<b>Gruppo ${gi.g}</b> · ${gi.i}° di ${gi.n} · ` : '';
+}
 function disegnaEnduro(){
   const s = stato(), lista = presenti();
   document.getElementById('tabs').innerHTML = [1,2,3].map(g => {
@@ -137,7 +144,7 @@ function disegnaEnduro(){
       <div class="pilot">
         <div class="num">${p.num}</div>
         <div class="name">${R.esc(p.nome)}</div>
-        <div class="meta">${correggi ? '<b>CORREZIONE</b> · ' : ''}Giro ${target.giro}${att != null ? ' · ora: ' + R.fmt(att) : ''}${R.ok(prev) ? ' · giro prima ' + R.fmt(prev) : ''}</div>
+        <div class="meta">${correggi ? '<b>CORREZIONE</b> · ' : ''}${grpTesto(target.num)}Giro ${target.giro}${att != null ? ' · ora: ' + R.fmt(att) : ''}${R.ok(prev) ? ' · giro prima ' + R.fmt(prev) : ''}</div>
       </div>
       ${correggi ? '' : `<div class="nav"><button onclick="sposta(-1)">◀ Indietro</button><button onclick="scegli()">🔎 Altro pilota</button><button onclick="sposta(1)">Salta ▶</button></div>`}
       <div class="display ${cifre?'':'empty'} ${bad?'bad':''}">${R.cifreDisplay(cifre)}</div>
@@ -155,10 +162,10 @@ function disegnaEnduro(){
 
   document.getElementById('tblTitle').textContent = `Giro ${giro} · ordine di partenza`;
   document.getElementById('tbl').innerHTML = `<tr><th>N°</th><th style="text-align:left">Pilota</th><th>G1</th><th>G2</th><th>G3</th></tr>` +
-    lista.map(p => `<tr class="${p.num===cur && !correggi ? 'cur':''} ${[1,2,3].some(g=>inCoda(p.num,g))?'pend':''}">
+    lista.map((p, k) => { const gi = R.gruppoDi(server.gruppi, lista.length, k + 1); return (gi && gi.i === 1 ? `<tr class="grp"><td colspan="5">Gruppo ${gi.g} · ${gi.n} piloti</td></tr>` : '') + `<tr class="${p.num===cur && !correggi ? 'cur':''} ${[1,2,3].some(g=>inCoda(p.num,g))?'pend':''}">
       <td>${p.num}</td><td class="l">${R.esc(p.nome)}</td>
       ${[1,2,3].map(g => { const v = tempo(s,p.num,g); return v != null ? `<td class="t" onclick="startCorreggi(${p.num},${g})">${R.fmt(v)}</td>` : '<td style="color:#cbd5e1">–</td>'; }).join('')}
-    </tr>`).join('');
+    </tr>`; }).join('');
 }
 
 // ---------- modo Enduro / Cross
